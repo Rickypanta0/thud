@@ -9,3 +9,5 @@ thesis*.synctex.gz
 thesis*.toc
 thesis*.lof
 thesis*.lot
+thesis*.fls
+thesis*.fdb_latexmk
