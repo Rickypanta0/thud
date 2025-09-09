@@ -33,8 +33,13 @@
 \usepackage[pdfa]{hyperref}
 \usepackage{tikz}
 \usepackage{subcaption}
-\usepackage{amsmath}
+\usepackage{amsmath, amssymb}
 \usepackage{float}
+\newlength{\colsep}
+\setlength{\colsep}{4.2cm}
+\usepackage{graphicx}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{calc,positioning, fit}
 %% tocbibind: Inserisce nell'indice anche la lista delle figure, la bibliografia, ecc.
 
 %% --- Stili di pagina disponibili (comando \pagestyle) ---
@@ -76,6 +81,7 @@ Nunc ac dignissim ipsum, quis pulvinar elit. Mauris congue nec leo ornare lobort
 
 %% Capitolo
 \chapter{Dataset}
+\label{sec:dataset}
 The analysis of nuclear features in histopathology images has long been recognized as a crucial aspect of cancer research and diagnosis. The part that seems like a bottleneck is the limited size of the most publicy available dataset for nuclei segmentation and classification, and often suffering from sparse labelling or sampling bias.\\
 To address this limitations, Gamper et al. (2019) 
 \cite{gamper2019pannuke,gamper2020pannuke} introduce and extended PanNuke, an open pan-cancer a semi-automatically obtained for nuclei instance segmentation and classification dataset.
@@ -88,7 +94,7 @@ For the segmentation stream, the authors used the Kumar \cite{article} dataset a
 
 \begin{table}[ht]
 \centering
-\caption{PanNuke Nuclei Categories from initial datasets}
+\caption{PanNuke Nuclei Categories from initial datasets. Reproduce from \cite{gamper2020pannuke}}
 \label{tab:pannuke_init}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lrrrrrrr}
@@ -114,7 +120,7 @@ The models predictions were evaluated in terms of uncertainty, like a clear misc
 \begin{figure}[h] % l'opzione [h] cerca di posizionare l'immagine "here"
     \centering
     \includegraphics[width=0.45\textwidth]{imgs/pannuke_annotations.png}
-    \caption{Questa è la didascalia dell'immagine}
+    \caption{Illustration of PanNuke for label and verificationthe. Reproduce from \cite{gamper2020pannuke}}
     \label{fig:esempio}
 \end{figure}
 Then proceed to Part A of annotation process Figure 1.1. After a total of 7 iterations of the process, pathologists would evaluate and re-label the detected and classified nuclei.\\
@@ -127,12 +133,12 @@ In evarage, most nuclei types that have been provided belongs in all tissues con
   \begin{minipage}{0.45\textwidth}
     \centering
     \includegraphics[width=\linewidth]{imgs/class_distributionù.png}
-    \caption{Didascalia 1}
+    \caption{Class distribution. Reproduce from \cite{gamper2020pannuke}}
   \end{minipage}\hspace{2cm}
   \begin{minipage}{0.3\textwidth}
     \centering
     \includegraphics[width=\linewidth]{imgs/class_tab.png}
-    \caption{Didascalia 2}
+    \caption{Nuclei categories. Reproduce from \cite{gamper2020pannuke}}
   \end{minipage}
 \end{figure}
 PanNuke defines nuclei into five categories, tab 1.3: \textbf{Neoplastic} includes any type of tumor, malignant or benign, therefore includes carcinomas, sarcomas, melanomas, lymphomas, etc. Those tumors are originate from different cell types: carcnimoas from epithelial; sarcomas from lymphoid cells etc.\\
@@ -151,29 +157,33 @@ For the purpose of this work, only neoplastic nuclei where considered. This choi
 By restricting the dataset to neoplstic nuclei, the resulting distribution is imbalanced compared to the full PanNuke schema.
 %% Fine dei capitoli normali, inizio dei capitoli-appendice (opzionali)
 \chapter{Methodology}
-\section{Workflow}
+The workflow of the proposed project is a standard deep learning pipeline for nuclei segmentation with differential tuning for detecting and counting the neoplastic nuclei in histopathology images.
 
-The workflow of the proposed project follows a typical deep learning pipeline for nuclei segmentation, adapted to the specific goal of detecting and counting neoplastic nuclei in histopathology images.
+In the first place, the raw images and object annotations are pre-processed to produce the model inputs. More specifically, original instance masks in PanNuke are converted into binary masks indicating the presence of neoplastic nuclei, and distance maps are calculated to encode the spatial interaction between neighbouring nuclei.
 
-First, raw images and their corresponding annotations are pre-processed in order to generate the inputs required by the model. In particular, original instance masks provided in PanNuke are converted into binary masks representing the presence of neoplastic nuclei, and distance maps are computed to capture spatial relationships between adjacent nuclei.
+The heart of the system is a U-Net \cite{DBLP:journals/corr/RonnebergerFB15} network with an additional two output heads. This multi-head design can make the model learn pixel-wise classification and spatial structural information simultaneously, which is beneficial to generalization and robustness, and can also enhance the performance of nuclei segmentation and counting task.
 
-The core of the system is based on a U-Net \cite{DBLP:journals/corr/RonnebergerFB15} architecture extended with two output heads. This multi-head workflow allows the model to simultaneously learn pixel-wise classification and spatial structural information, ensuring better generalization and robustness in the task of nuclei segmentation and counting.
-\subsection{Tool and environment}
-The development of the project required specific tools for model training and the pipeline execution. In this section will be presented the main software tools and the specific hardware components of the development enviroment. The entire project have been develop in Python 3.12.\\
+\subsection{Tool and environment} The realization of the project that involves the training of models and the execution of the pipeline demanded for tools. The complete project is written in Python 3.12. \
 
-\noindent\textbf{Hardware environment}\\
+\noindent\textbf{Hardware environment}\
 
-\noindent The whole pipeline have been execute on a PC, which has the following components:
-\begin{itemize}
-    \item \textbf{CPU}: AMD Ryzen 5 9600X, 6 core / 12 thread
-    \item \textbf{GPU}: NVIDIA RTX 3080 Ti 11 global
-    \item \textbf{RAM}: 32 GB DDR 5 6000 MHz
-    \item \textbf{Operative System}: Linux Ubuntu (64 bit)
-    \item \textbf{Caching CPU}: L3 38 MiB
-\end{itemize}
-This enviroment has garanted enough camputational calc for the model training.
-\subsection{Pipiline}
-The pipeline was developed to ensure the reproducibility of the workflow: from the pre processing to the automatic models evaluation. 
+\noindent The complete pipeline was run on a workstation having the following hardware components: \begin{itemize} 
+    \item \textbf{CPU}: AMD Ryzen 5 9600X, 6C/12T 
+    \item \textbf{GPU}: NVIDIA RTX 3080 Ti 11 GB-core
+    \item \textbf{RAM}: 32 GB DDR5, 6000 MHz 
+    \item \textbf{OS}: Linux (Ubuntu) 64 bit 
+    \item \textbf{CPU Cache}: L3 38 MB 
+\end{itemize} 
+This setting was computationally feasible for our model training.
+
+\subsection{Pipeline} The pipeline was constructed to guarantee that the entire workflow, from data pre-processing up to the automated model evaluation, was reproducible: from the preparation of the data to the automatic evaluation of the models. The entire set of procedure is coordinated by the main script \texttt{main.py}. The overall framework for automatic nuclear instance segmentation can be observed in Fig. 1 and the proposed network in Fig. 2
+
+\section{Problem statement} The aim of this study is to develop and investigate a segmentation framework specifically designed for the detection and counting of \textbf{neoplastic nuclei} from histopathology images. PanNuke annotates some other forms of nuclei in addition to other surrounding entities (multi-class) whereas ours is exclusive to cancerous nuclei (multi-nominal) translating the original multi-class problem to a binary segmentation problem.
+
+Another objective is to study the differences in performances and counting precision when different image representations (i.e., RGB, hematoxylin-extracted H\&E channels, blue colormaps, grayscale) are used. In this frame, the main points of research can be listed as: \begin{itemize} \item Binary masks and distance maps learned from PanNuke instance annotations serve as trustworthy supervisory signals for both segmentation and nuclei separation? \item What is the effect of the input modality on the model's capability to segment and count mitotic nuclei? \end{itemize}
+
+Addressing these questions are key to the strength of the proposed pipeline, and its potential for deployment in real-life digital pathology scenarios.
+
 \section{Pre processing}
 Preprocessing is a fundamental step, as it adapts the raw PanNuke data to the specific objective of segmenting and counting neoplastic nuclei. Since, the main goal is segment and count the neoplastic nuclei, this requires transforming the instance-level annotations into binary masks, as well as generating distance maps that help to separete the different cluster of nucleis.\\
 In addition, the original RGB images were processed using blu colormaps, hematoxylin-extracted H\&E channels and grayscale, to understand how various input affect segmentation performance.
@@ -250,6 +260,7 @@ By preprocessing the dataset into these four modalities, the experimental pipeli
 In the PanNuke datasets there are different files described in Section~\ref{sec:datafiles}, for this work will be use only a part of them. The task is to study the segmentation and counting of neoplastic cells. Therefore, the generation of binary masks and distance maps pivot on that goal.\\
 
 \noindent\textbf{Binary masks}\\
+\label{sec:maskgeneration}
 From the file \texttt{masks.npy}, have been extracted the channel corresponding to the neoplastic cells. The image extracted is $256 \times 256$ and provide as an instance map, where every individual cell is assigned a unique label (e.g., 1, 2, 3,\dots). Subsequently, to obtain a binary mask, all non-zero pixel in the instance map are mapped to 1, while background pixels remain 0. The instance map $I$, the corresponding binary mask $B$:
 \begin{center}
 $
@@ -270,16 +281,277 @@ This three-channel encoding brings to distinguish nuclear region from background
 \begin{figure}[H] % l'opzione [h] cerca di posizionare l'immagine "here"
     \centering
     \includegraphics[width=1\textwidth]{imgs/binarymask_transform.png}
-    \caption{Transformation from instance map to binary mask with 3 channels}
+    \caption{Overview of the proposed approach for the transformation from instance map to binary mask with 3 channels}
     \label{fig:esempio}
 \end{figure}
 \noindent\textbf{Distance maps}\\
+Beside the binary masks, the pre-processing pipeline also produce distance maps (265765) that give pixel-wise geometric information on nuclear shape. For H\&E images, every distance map consists of two channels representing the horizontal (H) and vertical (V) distance of the pixels to the centroid of their nuclei. This representation, spurred by HoVer-Net \cite{graham2019hovernet}, enables the model to disentangle touching or overlapping nuclei by learning their spatial configuration.
+
+Generation process will begin from the neoplastic nuclei instance maps obtained from \texttt{mask.npy}. The result is a standarised instance map, in which each nucleus has been labelled by an unique index. The class \texttt{GenInstanceHV}, next, computes the horizontal and vertical distances for all pixels within the nucleus, normalizing them between $-1$ and $1$. The pipeline also involves post-processing to account for duplicated labels due to data augmentation, and filtering very small objects.
+
+The resulting ground truth is a 2-array: binary mask containing neoplastic nuclei, and a pair of distance maps H and V. These will be used later as supervision targets for a segmentation head and a regression head of the U-Net: the segmentation head outputs imposingly binary masks, the regression head predicts dense HV maps.
+
+This formulation helps the model to learn the categorical and structural information jointly, which further enhances the stability of nuclei segmentation and counting.
+\begin{figure}[htbp] % o [H] con \usepackage{float}
+\centering
+\begin{tikzpicture}[node distance=8cm, >=stealth]
+  % immagini
+  \node (img1) {\includegraphics[width=0.30\textwidth]{imgs/instance.png}};
+  \node (img2) [right of=img1, xshift=1cm]
+        {\includegraphics[width=0.40\textwidth]{imgs/Distancemaps.png}};
+
+  % freccia con etichetta sopra
+  \draw[->] (img1.east) -- (img2.west)
+    node[midway, above]{\texttt{GenInstanceHV}};
+\end{tikzpicture}
+\caption{Overview of the proposed approach for the generation of distance maps}
+\label{fig:esempio}
+\end{figure}
 \subsection{Data Augmentation}
+To increase variability and reduce the risk of overfitting, the dataset was augmented during training using simple but effective geometric transformations. 
+All augmentation was implemented directly in the custom \texttt{DataGenerator} class, which inherits from \texttt{keras.utils.Sequence} and dynamically loads and transforms data on the fly. 
+
+The applied transformations were:
+\begin{itemize}
+    \item \textbf{Horizontal and vertical flipping}: images and their corresponding masks were randomly flipped along the horizontal or vertical axis with probability 0.5.
+    \item \textbf{Random rotations}: patches were rotated by multiples of 90 degrees, ensuring consistent orientation between the image, binary mask, and distance maps.
+\end{itemize}
+
+These transformations preserve the semantic structure of nuclei while increasing diversity in the training set. 
+By applying them stochastically at each epoch, the effective dataset size is multiplied, leading to improved generalization of the model. 
+It is important to note that both the segmentation masks and the distance maps were augmented consistently with the corresponding images to maintain spatial alignment. 
+
+In addition to geometric transformations, the \texttt{DataGenerator} also supports different input representations (RGB, hematoxylin channel, blue colormap, and grayscale), enabling a systematic comparison of model performance across varying image modalities. All transformations were applied only to the \textbf{train} subset, while \textbf{val} and \textbf{test} remained in their original form.\\
+
+Before each augmentation session, the script sets a global seed that synchronizes the random number generators of \textbf{NumPy} and \textbf{cv2} (OpenCV). This ensures that the same batch of images can always be reproduced and anomalies can be consistently identified.
 \section{Model Architecture}
+\label{sec:model}
+The proposed network is inspired by the U-Net architecture \cite{DBLP:journals/corr/RonnebergerFB15}, a widely used encoder–decoder structure for biomedical image segmentation. 
+U-Net consists of a contracting path, which progressively captures semantic context through convolutional and downsampling operations, and an expansive path, which combines this context with high-resolution spatial information via skip connections. 
+This design enables precise delineation of cellular structures even when only limited training data is available.
+
+In our implementation, the encoder is composed of successive convolutional blocks with batch normalization, ReLU activation, and dropout for regularization. 
+The number of filters doubles at each downsampling step (32, 64, 128, 256, 512), while max pooling layers reduce the spatial resolution by a factor of two. 
+The bottleneck layer captures high-level semantic features with 512 filters before entering the decoder.
+
+The decoder mirrors the encoder with upsampling layers, concatenations with the corresponding encoder features, and convolutional refinements. 
+This symmetric structure ensures that contextual information extracted at low resolutions is effectively fused with fine-grained spatial details.
+
+\noindent\textbf{Multi-head design.}  
+To better address the task of nuclei segmentation and separation, the model has been extended with two task-specific output heads, inspired by the HoVer-Net approach \cite{graham2019hovernet}:  
+\begin{itemize}
+    \item \textbf{Segmentation head (seg\_head)}: a 1$\times$1 convolution followed by a softmax activation outputs a 3-channel probability map corresponding to \textit{body}, \textit{background}, and \textit{border}. This representation explicitly encodes both nuclear regions and contours, which facilitates the separation of touching nuclei.  
+    \item \textbf{Distance head (hv\_head)}: a parallel 1$\times$1 convolution followed by a linear activation outputs two channels encoding the horizontal (H) and vertical (V) distances of each pixel to the nucleus centroid. These distance maps provide strong geometric cues to further separate overlapping nuclei.  
+\end{itemize}
+
+\noindent\textbf{Advantages.}  
+By combining semantic segmentation (seg\_head) with geometric regression (hv\_head), the network simultaneously learns categorical and structural information. 
+This multi-task formulation improves robustness in crowded regions and enhances nuclei counting, while preserving the efficiency of an end-to-end trainable model.
+\begin{figure}[H] % l'opzione [h] cerca di posizionare l'immagine "here"
+    \centering
+    \includegraphics[width=1\textwidth]{imgs/binarymask_transform.png}
+    \caption{Model architecture used}
+    \label{fig:Unet}
+\end{figure}
 \section{Loss Function}
+The model describred in Section~\ref{sec:model} is trained using a composite loss functino $\mathcal{L}^p+\mathcal{L}^d$ wich combines terms for pixel classificatino into $body$, $background$, $border$ ($\mathcal{L}^p$) and distance map regression in ($\mathcal{L}^d$).
+In the following, we refer at each pixel $i$ and to the heads'output tensor as $\widehat{\mathbf{Y}}^p=[\widehat{\mathbf{Y}}^p_{ik}]\in [0,1]^{H\times W\times P}$, $\widehat{\mathbf{Y}}^d=[\widehat{\mathbf{Y}}^d_{ik}]\in \mathbb{R}^{H\times W\times R}$, respectively, where $P = 3$, $R = 2$, are the number of pixels classes and the number of distance maps, $N$ and $W$ mathes the height and width of the images in input. The ground truths (GT) are represented as $\mathbf{Y}^p$ and $\mathbf{Y}^d$.
+
+A fundamental aspect to keep in mind when training a neural network models lies in the coice of an appropriate loss function. The loss function directly defines the model's optimization objective and this significantly influences ints performance and ability to handle common challenges such as class imbalance and structural detail preservation.
+
+As described before the U-net proposed has 2 dirrent sets of weights: $w_0, w_1$ which refer to the weights $\mathcal{L}^p$ (hv\_head) and $\mathcal{L}^d$ (seg\_head). These 2 sets of weights are optimised jointly using the loss $\mathcal{L}$ defined as:
+
+\begin{equation}
+\mathcal{L} =
+\underbrace{\lambda_a \mathcal{L}_a + \lambda_b \mathcal{L}_b}_{\text{hv\_head}} +
+\underbrace{\lambda_c \mathcal{L}_c + \lambda_d \mathcal{L}_d}_{\text{seg\_head}}
+\end{equation}
+where $\mathcal{L}_a$ and $\mathcal{L}_b$ represent the regression loss for the distance maps predicted, $\mathcal{L}_c$ and $\mathcal{L}_d$ represent the loss with respect ot the output at the seg\_head, therefore the binary masks. $\lambda_a\dots\lambda_d$ are scalars that gives weight to the the loss. More precisly, we set $\lambda_b$ to 2 and the others scalars set to 1. \\
+
+In practice, each component of the total loss corresponds to a specific learning objective. 
+For the \textbf{hv\_head}, which predicts the horizontal and vertical distance maps, two terms are considered: 
+
+\begin{itemize}
+    \item \textbf{Mean Squared Error (MSE)}:  
+    \begin{equation}
+        \mathcal{L}_a = \frac{1}{N} \sum_{i=1}^{N} \| \mathbf{Y}^d_{i1} - \widehat{\mathbf{Y}}^d_{i1} \|^2 + \| \mathbf{Y}^d_{i2} - \widehat{\mathbf{Y}}^d_{i2} \|^2
+    \end{equation}
+    where $\mathbf{Y}^d_{i1}, \mathbf{Y}^d_{i2}$ denote the ground-truth horizontal and vertical distance maps at pixel $i$, and $\widehat{\mathbf{Y}}^d_{i1}, \widehat{\mathbf{Y}}^d_{i2}$ are the corresponding predictions. 
+    This term enforces accurate regression of distance values. 
+    
+    \item \textbf{Gradient loss}:  
+    \begin{equation}
+        \mathcal{L}_b = \frac{1}{m} \sum_{i\in M} 
+        \big( \| \nabla_x \mathbf{Y}^d_{i1} - \nabla_x \widehat{\mathbf{Y}}^d_{i1} \|^2 + \| \nabla_y \mathbf{Y}^d_{i2} - \nabla_y \widehat{\mathbf{Y}}^d_{i1} \|^2 \big)
+    \end{equation}
+    where $\nabla_x$ and $\nabla_y$ represents the Sobel gradient operator. in horizontal $x$ and vertical $y$ directions respectively. $m$ denotes total number of nuclear pixels within the image and $M$ denotes the set containing all nuclear pixels.
+    This term enforces structural consistency and smoothness in the predicted distance maps, following the approach introduced by HoVer-Net \cite{graham2019hovernet}.
+\end{itemize}
+
+For the \textbf{seg\_head}, which outputs a 3-channel semantic segmentation mask (body, background, border), we employ two complementary terms: 
+
+\begin{itemize}
+    \item \textbf{Binary Cross Entropy (BCE)}:  
+    \begin{equation}
+        \mathcal{L}_c = - \frac{1}{N} \sum_{i=1}^{N} \sum_{k=1}^{P}\Big[ \mathbf{Y}^p_{ik}\log(\widehat{\mathbf{Y}}^p_{ik}) + (1 - \mathbf{Y}^p_{ik}) \log(1 - \widehat{\mathbf{Y}}^p_{ik}) \Big]
+    \end{equation}
+    where $\mathbf{Y}^p_{ik} \in \{0,1\}$ is the ground-truth label at pixel $i$ and $\widehat{\mathbf{Y}}^p_{ik} \in [0,1]$ is the predicted probability. 
+    This loss penalizes incorrect pixel-wise predictions and is particularly effective under class imbalance. 
+    
+    \item \textbf{Dice loss}:  
+    \begin{equation}
+        \mathcal{L}_d = 1 - \frac{2 \sum_{i=1}^{N} \sum_{k=1}^{P} \mathbf{Y}^p_{ik} \widehat{\mathbf{Y}}^p_{ik} + \epsilon}{\sum_{i=1}^{N} \sum_{k=1}^{P} \mathbf{Y}^p_{ik} + \sum_{i=1}^{N} \sum_{k=1}^{P} \widehat{\mathbf{Y}}^p_{ik} + \epsilon}
+    \end{equation}
+    where $\epsilon$ is a smoothing constant to avoid division by zero. 
+    This loss directly maximizes the overlap between predicted and ground-truth nuclear regions, mitigating the effect of class imbalance.
+\end{itemize}
+
 \section{Training Strategy}
-\section{Post Processing}
-\section{Evaluation Metrics}
+The handle of train session is gave to \texttt{main.py}, that check and evaluate every sperimental sesio. 
+\label{sec:train-strategy}
+
+\subsection{Optimizer}
+We train the network with the Adam optimizer \cite{kingma2014adam} using an initial learning rate $\eta_0=10^{-3}$ and
+decoupled weight decay (AdamW-style) with coefficient $\lambda_{\mathrm{wd}}=10^{-4}$ \cite{loshchilov2019adamw}, leading to improved generalization compared to standard Adam, especially in vision tasks.\\
+We adopt the standard $\beta_1{=}0.9$, $\beta_2{=}0.999$, and $\epsilon{=}10^{-8}$. In our experiments, the inclusion of a small decoupled weight decay yielded more stable training on this relatively small dataset.
+
+\subsection{Learning rate scheduler}
+THe learning rate is one of the most critical hyperparameters to set when training a model, directly affecting convergence speed, trainign stability, and overall model performance.\\
+We employ \texttt{ReduceLROnPlateau} on the validation objective (monitoring \texttt{val\_loss}) with
+reduction factor $\gamma{=}0.5$, patience of 3 epochs, and floor $\eta_{\min}{=}10^{-4}$.
+Formally, letting $s_t$ be the best validation score up to epoch $t$ and $p$ the patience,
+\[
+\eta_{t+1} =
+\begin{cases}
+\max\{\gamma\,\eta_t,\ \eta_{\min}\} &\text{if } \forall\,\tau\in\{t-p+1,\ldots,t\}:\ s_\tau \text{ did not improve},\\[2pt]
+\eta_t &\text{otherwise.}
+\end{cases}
+\]
+This adaptive schedule reduces the step size only when progress stalls, avoiding abrupt changes typical of step schedules and promoting smoother convergence.
+
+\paragraph{Early stopping and checkpointing.}
+We adopt early stopping (patience $=5$, monitor \texttt{val\_loss}, with weight restoration of the best epoch) and model checkpointing (\texttt{save\_best\_only=true}). Together with the scheduler, these callbacks limit overfitting and select the best performing model without manual intervention.
+
+\paragraph{Batching and generators.}
+Mini-batches are produced on the fly by a custom \texttt{DataGenerator} (\S\ref{sec:datafiles}), which performs geometric augmentation on the training split (random flips and rotations by $k\cdot 90^\circ$) and keeps validation/test untouched. Targets are generated consistently for both heads: the 3-channel segmentation target (\emph{body}, \emph{background}, \emph{border}) for \texttt{seg\_head} and the two HV maps (plus focus mask) for \texttt{hv\_head}.
+
+\paragraph{Reproducibility.}
+We fix global seeds for NumPy and PyTorch (\texttt{SEED=42}) and enable deterministic behavior where possible; training runs on a single GPU (RTX~3080~Ti), with \texttt{keras} configured to use the \texttt{torch} backend.
+
+\paragraph{Summary of hyperparameters.}
+\begin{center}
+\begin{tabular}{l l}
+\hline
+Optimizer & Adam ($\eta_0{=}10^{-3}$, $\beta_1{=}0.9$, $\beta_2{=}0.999$, decoupled WD $=10^{-4}$) \\
+Scheduler & ReduceLROnPlateau (monitor=\texttt{val\_loss}, factor $=0.5$, patience $=3$, $\eta_{\min}{=}10^{-4}$) \\
+Early stopping & patience $=5$, restore best weights \\
+Checkpointing & best on \texttt{val\_loss} \\
+Batch size & $8$ \\
+Loss weights & $\text{seg\_head}:1.0$, $\text{hv\_head}:2.0$ \\
+Epochs & $30$ (with early stop) \\
+\hline
+\end{tabular}
+\end{center}
+\section{Post-processing}
+
+The raw outputs of the multi-head U-Net model described in Sectio model, namely the probability maps from the \texttt{seg\_head} and the distance maps from the \texttt{hv\_head}, cannot be directly used for reliable nuclei counting. 
+According to the notation in Section loss, this yield predictions $\widehat{\mathbf{Y}}^p$ and $\widehat{\mathbf{Y}}^d$ for the entire image, which are post-processed as illustrated in Fig1 and described below. 
+This stage was partly inspired by the post-processing strategy proposed in HoVer-Net \cite{graham2019hovernet}, but adapted to the specific requirements of this work.
+
+\subsection{Distance-based separation}
+The distance maps predicted by the \texttt{hv\_head} are leveraged to separate adjacent or overlapping nuclei. 
+For each pixel, the horizontal ($\widehat{\mathbf{Y}}^d_{i1}$) and vertical ($\widehat{\mathbf{Y}}^d_{i2}$) distance components are normalized into the range $[0,1]$ and each $\nabla_k,k=1,2$ rapresent the convolution with of a Sobel kernel:
+\[
+G_H = \nabla_1 \widehat{\mathbf{Y}}^d_{i1}, \qquad G_V = \nabla_2 \widehat{\mathbf{Y}}^d_{i2}.
+\]
+The combination of these gradients defines a boundary likelihood map:
+\[
+E = \mathbb{I}(max \big( 1 - \text{norm}(G_H), \, 1 - \text{norm}(G_V) \big)> \theta_1),
+\]
+which emphasizes nuclear contours and facilitates the detection of cell boundaries. The $\theta_1$ is binarizatino treshold, controls the amount of pixels considered as edges. The optimal value is set to $\theta_1=0.45$ for all models, it's been calculated on maximum of IoU see Section~\ref{sec:model}.
+\subsection{Segmentation refinement}
+
+The first step is to merge the predictions of the segmentation head. 
+The model outputs three channels \emph{body}, \emph{background} and \emph{border} respectively $\widehat{\mathbf{Y}}^p_{i1}$, $\widehat{\mathbf{Y}}^p_{i2}$ and $\widehat{\mathbf{Y}}^p_{i3}$, which are combined into a binary probability map representing candidate nuclear regions :
+\[
+B = \mathbb{I}(\widehat{\mathbf{Y}}^p_{i1} + \widehat{\mathbf{Y}}^p_{i3} > \widehat{\mathbf{Y}}^p_{i2}),
+\] 
+This map highlights pixels likely to belong to nuclei and serves as a mask for subsequent refinement.
+
+\subsection{Watershed instance segmentation}
+Instance-level segmentation is obtained by applying a watershed algorithm to the boundary likelihood map. 
+Candidate markers are generated by thresholding and morphological filtering, and the watershed is applied within the nuclear mask $B$. 
+This yields a labeled instance map, where each connected component corresponds to a unique nucleus.\\
+The topological surface used for the watershed transform is obtained from the complement of the predicted probability map, combined with the complement of the product between the binary nuclear mask and the inverse of the boundary map. 
+This composite representation enhances the separation of touching nuclei and serves as the input for the watershed segmentation. 
+The output is an instance segmentation map (or label map) $\hat{Y}_l$, in which each detected nucleus is assigned a unique positive integer label. 
+Finally, objects with an area smaller than a threshold $\theta_2$, corresponding to the minimum acceptable nuclear size, are removed in order to discard spurious detections.
+
+\subsection{Nuclei counting}
+The final instance map is passed to a contour analysis stage that identifies individual nuclei and computes their bounding boxes. 
+This step enables robust estimation of the nuclei count, which is then compared against the ground truth for evaluation.
+
+\subsection{Overview}
+The complete post-processing workflow can be summarized as follows:
+\begin{enumerate}
+    \item Merge segmentation outputs into a binary nuclear probability map.
+    \item Normalize and process horizontal/vertical distance maps.
+    \item Compute boundary likelihood using Sobel gradients.
+    \item Apply watershed segmentation to obtain labeled instances.
+    \item Remove small objects and artifacts.
+    \item Count nuclei and extract contours for visualization.
+\end{enumerate}
+
+An overview of the full process --- from dataset to prediction, instance segmentation, and final counting --- is illustrated in Figure~\ref{fig:postproc_overview}.
+\section{Evaluation Method}
+In order to assess the performance of the model, we utilize both $quantitative$ and $qualitative$ evaluation methods.\\
+The quantitative evaluation is based on objective numerical metrics calculated from a reserved test set. These metrics evaluate various facets of segmentation performance, offering a standardized means for comparing different types of colormaps applied to the input images.\\
+Conversely, qualitative evaluation emphasizes the visual examination of high-resolution segmentation outputs. Additionally, due to the semi-automated nature of dataset annotations (as outlined in section~\ref{sec:dataset}), qualitative assessment also serves to highlight instances where model predictions may exceed ground truth accuracy.\\
+The subsequent subsections elaborate on the metrics employed for quantitative assessment and the strategy used for qualitative analysis.\\
+To gain deeper insights into the method, it is advantageous to decompose the problem into smaller sub-tasks and evaluate the method's performance on each one. Thus, for nuclear instance segmentation, we can categorize the problem into three distinct sub-tasks:
+\begin{itemize}
+    \item Distinguishing nuclei from the background
+    \item Identifying individual nuclear instances
+    \item Segmenting each identified instance
+\end{itemize}
+\subsection{Metrics}
+Two primary evaluation metrics have been utilized to gauge performance in nuclear instance segmentation:
+\begin{enumerate}
+    \item Ensemble Dice (DICE2) \cite{vu2019methods}
+    \item Aggregated Jaccard Index (AJI) \cite{kumar2017dataset}
+\end{enumerate}
+Let X represent the ground truth and Y denote the predictions; specifically, X and Y refer to outcomes following post-processing. DICE2 calculates DICE for each nucleus using the Dice coefficient defined as follows:
+\begin{equation}
+    Dice = \frac{X\times(X\cap Y)}{(|X|+|Y|)}
+\end{equation}
+Meanwhile, AJI evaluates the ratio between aggregated intersection cardinality and aggregated union cardinality for sets X and Y.\\
+These two evaluation metrics can only give a global perspective of the quality of the instance segmentation and do not help understanding of the performance on underlying sub-tasks.
+Both DICE2, and AJI suffer a known limitation regarding the treatment of overlapping regions.
+There is also a large negative effect on the score even for small gaps between two predictions, because predicted instances can overlap not only with the corresponding ground-truth but also with the neighbouring ones.
+In the DICE2 framework this leads to over-penalisation, as pixels belonging to the estimated nucleus are treated as errors for a number of ground truth instances.
+The AJI measure which pairs predictions and ground truth instances by using the highest intersection over union, is not as sensitive to this, but still influenced in the case where neighboring instances are completely missed.
+This phenomenon is even more observed in challenging datasets like the one considered, in which there are nuclei presenting weak staining or unusual cell types to recognize, resulting in a larger proportion of nuclei that were not detected.
+Due to the limitations of DICE2 and AJI, it is clear that there is a need for an improved reliable quantitaive measurement.\\
+
+\textbf{Panoptic Quality}: We need to use another metric for accurate qantification and interpretability. Inspired by Hover-Net and originally proposed by \cite{kirillov2019panoptic}, panoptic quality (PQ) for nuclear instance segmentation is defined as:
+\begin{equation}
+\mathcal{PQ} =
+\underbrace{\frac{|TP|}
+{|TP| + \tfrac{1}{2}|FP| + \tfrac{1}{2}|FN|}}_{\text{Detection Quality (DQ)}}
+\times
+\underbrace{\frac{\sum_{(x,y) \in TP} IoU(x,y)}
+{|TP|}}_{\text{Segmentation Quality (SQ)}}
+\end{equation}
+where $x$ denotes a Gt segment, $y$ y denotes a prediction segment and IoU denotes intersection over union. Each $(x,y)$ pair is mathematically proven to be unique over the entire set of prediction and GT segments if their IoU$(x,y)>0.5$. \\
+Now, PQ can be read as follows: the $detection\ quality$ (DQ) is the $F_1$ Score, while $segmentation\ quality$ (SQ) can be interpreted as how close each correctly detected instance is to their matched GT.\\
+
+To understand the correctly association with the sub-task claimed above, we use the following three metrics:
+\begin{enumerate}
+    \item DICE to measure the separation of all nuclei from the back-ground.
+    \item Panoptic Quality as a unified score for camparison
+    \item AJI
+\end{enumerate}
+\chapter{Results}
 
 \appendix
 
