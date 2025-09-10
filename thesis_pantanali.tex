@@ -38,6 +38,7 @@
 \newlength{\colsep}
 \setlength{\colsep}{4.2cm}
 \usepackage{graphicx}
+\usepackage{booktabs}
 \usetikzlibrary{backgrounds}
 \usetikzlibrary{calc,positioning, fit}
 %% tocbibind: Inserisce nell'indice anche la lista delle figure, la bibliografia, ecc.
@@ -552,6 +553,134 @@ To understand the correctly association with the sub-task claimed above, we use 
     \item AJI
 \end{enumerate}
 \chapter{Results}
+\label{sec:results}
+This chapter presents the expertimental results obtained by training and evaluating, multiple semantic segmentation models on the PanNuke dataset described in chapter \ref{sec:dataset}, using the methodology detailed in chapter \ref{sec:methodology}.\\
+We begin by outlining a set of preliminary experiments that assess the impact of different input modalities (RGB, Hematoxylin, Blu colormap, Grayscale) to compare models performances, reporting quantitative results using standard segmentation metrics as described in Section~\ref{sec:metrics}, then analyse the nuclei counting accuracy, and complementing them with qualitative analysis of segmentation outputs on full images.\\
+Unless otherwise stated, post-processing thresholds were set as in Section~\ref{sec:postprocessing}, with the foreground threshold $\theta_1$ tuned on validation by IoU on ground-truth labels and $\theta_2$ as the minimum instance area.
+
+\section{Instance segmentation results}
+Table~\ref{tab:iou-results} summarizes the instance-level performance using DICE2, AJI and PQ (Section~\ref{sec:evaluation-method}). 
+PQ is further factorized into detection quality (DQ) and segmentation quality (SQ), providing a more interpretable view on missed detections vs. mask quality.
+
+\begin{table}[ht]
+\centering
+\caption{Instance-level segmentation performance across input modalities. Scores are averaged over the test set.}
+\label{tab:iou-results}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Input} & \textbf{DICE2} $\uparrow$ & \textbf{AJI} $\uparrow$ & \textbf{PQ} $\uparrow$ & \textbf{DQ / SQ} \\
+\midrule
+RGB         & 0.607 & 0.530 & 0.639 & 0.64 / 0.99 \\
+Hematoxylin & 0.599 & 0.515 & 0.622 & 0.62 / 1.00 \\
+Blue        & 0.556 & 0.450 & 0.585 & 0.57 / 1.03 \\
+Grayscale   & 0.586 & 0.501 & 0.625 & 0.63 / 0.99 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Discussion.} 
+Consistent with the literature on H\&E images, RGB and Hematoxylin inputs lead to higher PQ and AJI than Blue; Grayscale remains competitive, suggesting that much of the discriminative signal lies in structure rather than color. 
+As discussed in Section~\ref{sec:evaluation-method}, DICE2 and AJI tend to over-penalize overlaps in crowded regions; PQ mitigates this by decoupling detection and mask quality.
+
+\section{Pixel-wise segmentation sanity check}
+Besides instance metrics, we also report a pixel-wise IoU and F1 score on the binary foreground ($\text{body}\cup\text{border}$ vs background), as a sanity check for under/over-segmentation:
+
+\begin{table}[ht]
+\centering
+\caption{Pixel-wise foreground segmentation (binary) on the test set.}
+\label{tab:pix-binary}
+\small
+\begin{tabular}{lcc}
+\toprule
+\textbf{Input} & \textbf{IoU} $\uparrow$ & \textbf{F1} $\uparrow$ \\
+\midrule
+RGB         & 0.656 & 0.870 \\
+Hematoxylin & 0.640 & 0.863 \\
+Blue        & 0.582 & 0.834 \\
+Grayscale   & 0.635 & 0.861 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Counting analysis}
+\label{sec:counting-analysis}
+To evaluate the counting performance, we compare the number of predicted instances with the number of ground-truth instances, both obtained after post-processing. 
+Let $\hat{n}_i$ and $n_i$ denote the predicted and ground-truth nuclei counts for image $i$, respectively, with $i=1,\dots,N$.
+
+The following metrics are employed:
+
+\begin{itemize}
+    \item \textbf{Mean Absolute Error (MAE)}: measures the average absolute deviation between predicted and ground-truth counts,
+    \begin{equation}
+        \mathrm{MAE} = \frac{1}{N}\sum_{i=1}^{N} \left| \hat{n}_i - n_i \right|.
+    \end{equation}
+
+    \item \textbf{Pearson correlation coefficient} $\rho$: quantifies the degree of linear correlation between predictions and ground truth,
+    \begin{equation}
+        \rho = \frac{1}{N-1}\sum_{i=1}^N 
+        \left(\frac{\hat{n}_i - \mu_{\hat{n}}}{\sigma_{\hat{n}}}\right)
+        \left(\frac{n_i - \mu_{n}}{\sigma_{n}}\right),
+    \end{equation}
+    where $\mu_{\hat{n}}, \sigma_{\hat{n}}$ are the mean and standard deviation of the predicted counts, and $\mu_{n}, \sigma_{n}$ are the mean and standard deviation of the ground-truth counts.
+
+    \item \textbf{Coefficient of determination} $R^2$: Cell counting performance represents the ability to determine cellular composistion \cite{kirillov2019panoptic}. It can be quantified via the $coefficient\ of\ determination$ $\textbf{R}^2$ to assess the correlation between the predicted and true counts as:
+    \begin{equation}
+        R^2 = 1 - \frac{\sum_{i=1}^N (n_i - \hat{n}_i)^2}{\sum_{i=1}^N (n_i - \mu_{n})^2},
+    \end{equation}
+    where the numerator corresponds to the residual sum of squares (RSS) and the denominator to the total sum of squares (TSS).
+\end{itemize}
+
+\subsection{Scatter plot and global scores}
+Figure~\ref{fig:scatter} shows the scatter of predicted vs. ground-truth nuclei per image, with the identity line as reference.
+We also annotate $\rho$, MAE and $R^2$ in the title for quick comparison across models.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.55\linewidth]{imgs/3ch_binarymask.png}
+    \caption{Predicted vs. ground-truth nuclei per image (RGB model). The title reports $\rho$, MAE and $R^2$.}
+    \label{fig:scatter}
+\end{figure}
+
+\subsection{Bias analysis}
+We test whether the mean counting error is statistically different from zero (no bias) via a one-sample $t$-test and Wilcoxon signed-rank test; we also visualize the error distribution with 95\% confidence interval (Figure~\ref{fig:bias-hist}). 
+This reveals whether the model systematically under- or over-counts.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\linewidth]{imgs/3ch_binarymask.png}
+    \caption{Distribution of per-image counting error (Pred - GT) for the RGB model with 95\% CI and test statistics.}
+    \label{fig:bias-hist}
+\end{figure}
+
+\section{Stratified analysis by image characteristics}
+\label{sec:strata}
+To understand failure modes, we stratify images by nuclear size and density. 
+Each image is assigned to one of four categories based on the median of mean nucleus area (\emph{small/large}) and median nearest-neighbour distance (\emph{high/low} density). 
+For each category and model, we report the distribution of counting error using box plots (Figure~\ref{fig:box-cats}).
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.9\linewidth]{imgs/3ch_binarymask.png}
+    \caption{Counting error grouped by image category (small/large area, high/low density) and input modality (RGB, H, Blue, Gray).}
+    \label{fig:box-cats}
+\end{figure}
+
+\section{Qualitative results}
+Figure~\ref{fig:qualitative} shows representative examples with input image, predicted foreground, HV maps, watershed instance map, and contour overlay. 
+These qualitative results highlight typical success cases (well-separated clusters) and common failure cases (touching nuclei with faint boundaries).
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.98\linewidth]{imgs/3ch_binarymask.png}
+    \caption{Qualitative examples: input, binary foreground, HV maps, watershed labels, and contours overlay.}
+    \label{fig:qualitative}
+\end{figure}
+
+\section{Summary}
+Overall, RGB input achieves the best trade-off across segmentation and counting metrics, with Hematoxylin close behind. 
+Blue degrades both PQ and counting stability, suggesting that its contrast mapping discards useful chromatic cues for boundary localization. 
+The stratified analysis indicates that errors increase in high-density scenes with small nuclei, where overlaps and weak boundaries are more frequent.
 
 \appendix
 
