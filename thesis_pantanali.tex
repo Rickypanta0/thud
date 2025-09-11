@@ -115,18 +115,60 @@ The rest of this thesis is structured as follows:
 This chapter introduces the theoretical foundations required to understand the methods and experiments presented in this thesis. 
 We begin with an overview of digital histopathology, highlighting the role of hematoxylin and eosin (H\&E) staining in emphasizing nuclear morphology and motivating the use of color deconvolution techniques to isolate relevant channels such as hematoxylin, blue, and grayscale representations. 
 We then provide the necessary background on convolutional neural networks (CNNs) and encoder-decoder architectures, with particular attention to the U-Net model and its extensions for biomedical image segmentation. 
-THen we outline post-processing strategies such as distance map regression and watershed transforms, which play a crucial role in refining segmentation outputs and enabling accurate nuclei counting.
+Then we outline post-processing strategies such as distance map regression and watershed transforms, which play a crucial role in refining segmentation outputs and enabling accurate nuclei counting.
+\section{Color deconvolution}
 \section{Computer vision}
 Computeer vision is a field of study that enables computers to interpret and make decisions based on visual data as images or videos. It encompasses a wide range of tasks, including object detection, image classification. segmentation, and traking. The ultimate goal of computer vision is to replicate and eventually surpass human visual understanding. \\
 Traditionally. computer vision system relied on hand-crafted features and classical algorithms to extract and process visual information. While these techniques achieved some success, they required significant domain expertise and manual effort and often struggled with generalization to real-world data \cite{lecun2015deep}.\\
 The emergence of deep learning, particuarly Convolutional Neural Networks (CNNs) \cite{lecun1998gradient}, marked a significant shift in the field. Instead of relying on engineered features, CNNs learn hierarchical feature representations directly from raw image data, anabling end-to-end training for complex visual tasks \cite{krizhevsky2012imagenet}.
-\section{Semantic segmentation}
-Figure\cite{fig:semantic} illustrates the difference between several common computer vision tasks. Image recognition (top left) predicts the presence of classes in an image as a whole. Object detection (bottom left) goes further by locating individual object with bounding boxes. Unlike the previous two tasks, semantic segmentation (top right) involves assigning a class label to each individual pixel in an image, providing a dense, pixel-level understanding of the scene. Finally, instance segmentation (bottom right) extends semantic segmentation by separating each object instance within a class. For example, in semantic segmentation, all sheep in an image are labeled as $sheep$, while in sintance segmentation they are both labeled as $sheep$ and separated as distinct entities.
+\section{Instance segmentation}
+Figure \ref{fig:semantic} illustrates the difference between several common computer vision tasks. Image recognition (top left) predicts the presence of classes in an image as a whole. Object detection (bottom left) goes further by locating individual objects with bounding boxes. Semantic segmentation (top right), instead, assigns a class label to each pixel, without distinguishing among different instances of the same category. 
+
+Instance segmentation (bottom right) extends this concept by not only labeling each pixel but also separating different instances within the same class. For example, in semantic segmentation all sheep in an image are simply labeled as \textit{sheep}, whereas instance segmentation ensures that each sheep is uniquely identified as a distinct entity. This pixel-level and instance-aware prediction makes the task particularly suited for applications where the number, shape, and boundaries of objects are critical.  
+
 \begin{figure}[h]
     \centering
-    \includegraphics[width=\linewidth]{imgs/Instance segmentation.png}
+    \includegraphics[width=0.75\linewidth]{imgs/Instance segmentation.png}
     \caption{Sample annotated image from the COCO \cite{lin2015microsoftcococommonobjects} dataset with a comparison of common computer vision tasks.}
+    \label{fig:semantic}
 \end{figure}
+
+In this work, we focus exclusively on \textbf{instance segmentation}, as our goal is to estimate the number of neoplastic nuclei in histopathology images. This requires not only identifying which pixels belong to nuclei, but also distinguishing between adjacent ones. To this end, the output of our models consists of binary masks where each predicted nucleus after postprocessing will be labeled as a separate instance. This approach allows us to precisely count, localize, and analyze individual nuclei, which would not be possible with standard semantic segmentation.
+\section{Convolutional Neural Networks (CNNs)}
+This section introduce Convolutional Neural Networks (CNNs) in the context of instance segmentation. We begin with a general overview of CNNs and their key components. Then, we discuss how CNNs are used as encoders to extract features from input images, and how these features are processed by segmentation architectures to produce pixel-wise predictions.
+\subsection{Overview}
+A Convolutional Neural Network (CNN) is specialized type of artificial neural network designed to process data with a grid-like structure, such as images. through convolutional layers that capture sparial hierarchies within data. CNNs have demostrated superior performance in numerous visual recognition tasks including image classification, object detection, and instance segmentation.\\
+A typical CNN architecture consists of the following core components:
+\begin{itemize}
+    \item \textbf{Convolutional layers}: these layers perform convolution operations using a set of learnable filters (kernels). Given an input tensor $\mathbf{X}\in\mathbb{R}^{H\times W\times C}$, where $H$, $W$, and $C$ represent the height, width, and number of input channels, the convolution with filter $\mathbf{K}_i\in \mathbb{R}^{k\times k\times C}$ produces and output feature map $\mathbf{Y}_i\in \mathbb{R}^{H\times W}:$
+    \begin{equation}
+        \mathbf{Y}_i=\mathbf{X}*\mathbf{K}_i+b_i
+    \end{equation}
+    where $*$ denotes the discrete convolution operator, and $b_i\in\mathbb{R}$ is a learnable bias term. The convolution operation can highlight specific patterns such as edges, textures, or more complex shapes.
+    \item \textbf{Activation functions}: After convolution, an activation function is applied to introduce non-linearity into the network. Common activation functions include Rectified Linea Unit (ReLU), sigmoid. and hyperbolic tanget (tanh). ReLU, defined as $f(x)=max(0,x)$, is particularly popular due to its simplicity and ability to mitigate the vanishing gradient problem.
+    \item \textbf{Pooling layers}: pooling operations reduce the spatial dimensions of feature maps. Max pooling, retaining the maximum value within a local region $\mathcal{R}\subset \mathbb{R}^{p\times p}$, is frequently used:
+    \begin{equation}
+        Y_{i,j}=max_{(m,n)\in\mathcal{R}}X_{i+m,j+n}
+    \end{equation}
+    Pooling layers emphasize dominant features while discarding irrelevant details. Alternatively, average pooling, which computes the evarage, is also frequently used.
+    \item \textbf{Fully connected layers}: typically placed at teh end of CNN architectures for classification or regression tasks, these layers integrate extracted features into high-level representations to generate final predictions.
+\end{itemize}
+CNNs leverage hierarchical feature extraction, capturing local features initially (e.g.,edges, corners) which progressively combine into more global, semantic features. This hierarchical structure  enables CNNs to efficiently learn invariance and robust visual representations.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{imgs/CNN.png}
+    \caption{Basic CNN architecture. Reproduce from researchgate.com}
+\end{figure}
+\subsection{Segmentation architecture}
+A \textbf{segmentation architecture} is the component of semantic segmentation model that converts high-level feature maps from the encoder into pixel-wise class predictions. While the encoder focuses on extracting semantic information by downsampling the input,the segmentation architecture restores spatial resoltion to produce segmentation masks.\\
+Typical segmentation architecture designs use a combination of upsampling layers, skip connections, and convolutions to progressively refine features and recover spatial details. The choice of the architecture affects both the accuracy and efficiency of the segmentation model. \\
+For this work there are several widley used CNN-base segmentation architectures, including UNet, and UNet++. As described in chapter \ref{sec:model} we used a UNet with two heads.\\
+
+\noindent\textbf{UNet}\\
+
+\noindent UNet is a CNN architecture specifically designed for instance segmentation tasks, pariomedical image analysis. It was introduced in \cite{DBLP:journals/corr/RonnebergerFB15} to address the challenge of achieving precise pixel-level segmentation with limited data. 
+\section{Distance maps}
+\section{Watershed algorithm}
 \chapter{Dataset}
 \label{sec:dataset}
 The analysis of nuclear features in histopathology images has long been recognized as a crucial aspect of cancer research and diagnosis. The part that seems like a bottleneck is the limited size of the most publicy available dataset for nuclei segmentation and classification, and often suffering from sparse labelling or sampling bias.\\
