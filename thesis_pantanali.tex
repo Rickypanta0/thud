@@ -71,7 +71,7 @@ Nunc ac dignissim ipsum, quis pulvinar elit. Mauris congue nec leo ornare lobort
 %\listoftables
 
 %% Lista delle figure (se presenti)
-%\listoffigures
+\listoffigures
 
 %% Corpo principale del documento
 \mainmatter
@@ -81,6 +81,52 @@ Nunc ac dignissim ipsum, quis pulvinar elit. Mauris congue nec leo ornare lobort
 %\part{Parte}
 
 %% Capitolo
+\chapter{Introduction}
+\label{sec:introduction}
+Histopathology is the gold standard for cancer diagnosis in which tissue biopsies are stained and examined under the microscope by pathologists to determine the presence and extent of disease. Among these, the morphology, density and spatial distribution of cell nuclei, is of paramount importance to the diagnosis and prognosis. However, manual assessment is laborious, subjective and suffers from inter-observer variation, which drives the need for an automatic computer aided mechanism for segmentation and analysis of nuclei.
+Deep learning in recent years has been considered a breakthrough technology in medical image analysis, achieving extraordinary performance in different tasks ranging from tumor detection, grading and quantification of biomarkers. Convolutional Neural Networks (CNNs) and their variant U-Net have emerged as the de facto method for biomedical image segmentation, achieving the reliable performance even under the presence of challenging imaging conditions. Building on these advancements, dedicated architectures, e.g. HoVer-Net \cite{graham2019hovernet}, have been introduced to separate clustered or overlapping nuclei through a simultaneous prediction of segment masks and distance maps.
+Nevertheless, some challenging problems are left open. The publiavailable nuclei datasets are not only small, but also of a diverse quality, and containing the incomplete and noisy annotations. Furthermore, many nucleus are closely spaced, partly occluded or weakly stained and therefore especially difficult to separate. These constraints create major barriers to building trustworthy models for clinical use.
+In this work, we consider the problem of segmenting and counting \textbf{neoplastic nuclei} in histopathology images. Unlike multi-class methods that target at classifying all nuclear subtypes, we are particularly interested in the classification of malignant nucleus since they are more relevant for cancer diagnosis and progression. This study is built upon the widely-used PanNuke dataset \cite{gamper2019pannuke,gamper2020pannuke} with instance-level nuclear annotations on multiple tissue types.
+
+To address the segmentation and counting problem, we introduce a U-Net model with two task-specific heads: a segmentation head that produces a three-channel representation (\textit{body}, \textit{background}, \textit{border}), and a regression head that estimates horizontal and vertical distance maps of nuclei. This multi-head architecture allows the model to simultaneously learn categorical and geometric features, which is deeper and helps separate touching nuclei and robust counting.
+We Also explore the impact of various image preprocessing modalities (RGB, hematoxylin-extracted H\&E, blue colormap, grayscale) on the model performance. This investigation seeks to clarify the role that color and intensity information plays in the segmentation and counting of neoplastic nuclei.
+
+\section{Problem Definition and Objectives}
+The objective of this work is to design a deep learning based framework for the segmentation and counting of the neoplastic nuclei in histopathology images. Specifically, we aim to:
+\begin{enumerate}
+\item Develop a pre-processing pipeline that preprocesses the PanNuke instance annotations into binary masks and distance maps for training.
+\item Develop and train a multi-head U-Net model to predict both the segmentation masks and horizontal/vertical distance maps simultaneously.
+\item Analyze how well the model generalizes across different input representations (RGB, Hematoxylin, Blue, Grayscale).
+\item Show results in terms of both segmentation (Dice, IoU, AJI, PQ) and counting (MAE, $R^2$, Pearson correlation) metrics.
+\item Inspect the error distribution between the categories of size and density of nuclear morphology to gain insight into the model behavior and the challenging cases.
+\end{enumerate}
+
+\section{Structure of the Thesis}
+The rest of this thesis is structured as follows:
+\begin{itemize}
+\item \textbf{Chapter 2 (Theoretical Aspects)} provides the theoretical background underlying this work, including fundamentals of deep learning, convolutional neural networks, and related approaches for biomedical image segmentation and nuclei instance analysis.
+\item \textbf{Chapter 3 (Dataset)} Presents the PanNuke dataset, followed by its creation process, class distribution, and the statistics related to our study.
+\item \textbf{Chapter 4 (Method)} Defines the whole pipeline by preprocessing, proposed multi-head U-Net architecture, losses, training strategy, and post-processing steps.
+\item \textbf{Chapter 5 (Results)} Presents the experimental results including the comparison of different preprocessing options as well as an investigation of the segmentation and counting quality.
+\item \textbf{Chapter 6} (\textbf{Discussion and Conclusion}) Summarizes key findings, discusses limitations and suggests potential future research directions.
+\end{itemize}
+\chapter{Theoretical aspect}
+\label{sec:theory}
+This chapter introduces the theoretical foundations required to understand the methods and experiments presented in this thesis. 
+We begin with an overview of digital histopathology, highlighting the role of hematoxylin and eosin (H\&E) staining in emphasizing nuclear morphology and motivating the use of color deconvolution techniques to isolate relevant channels such as hematoxylin, blue, and grayscale representations. 
+We then provide the necessary background on convolutional neural networks (CNNs) and encoder-decoder architectures, with particular attention to the U-Net model and its extensions for biomedical image segmentation. 
+THen we outline post-processing strategies such as distance map regression and watershed transforms, which play a crucial role in refining segmentation outputs and enabling accurate nuclei counting.
+\section{Computer vision}
+Computeer vision is a field of study that enables computers to interpret and make decisions based on visual data as images or videos. It encompasses a wide range of tasks, including object detection, image classification. segmentation, and traking. The ultimate goal of computer vision is to replicate and eventually surpass human visual understanding. \\
+Traditionally. computer vision system relied on hand-crafted features and classical algorithms to extract and process visual information. While these techniques achieved some success, they required significant domain expertise and manual effort and often struggled with generalization to real-world data \cite{lecun2015deep}.\\
+The emergence of deep learning, particuarly Convolutional Neural Networks (CNNs) \cite{lecun1998gradient}, marked a significant shift in the field. Instead of relying on engineered features, CNNs learn hierarchical feature representations directly from raw image data, anabling end-to-end training for complex visual tasks \cite{krizhevsky2012imagenet}.
+\section{Semantic segmentation}
+Figure\cite{fig:semantic} illustrates the difference between several common computer vision tasks. Image recognition (top left) predicts the presence of classes in an image as a whole. Object detection (bottom left) goes further by locating individual object with bounding boxes. Unlike the previous two tasks, semantic segmentation (top right) involves assigning a class label to each individual pixel in an image, providing a dense, pixel-level understanding of the scene. Finally, instance segmentation (bottom right) extends semantic segmentation by separating each object instance within a class. For example, in semantic segmentation, all sheep in an image are labeled as $sheep$, while in sintance segmentation they are both labeled as $sheep$ and separated as distinct entities.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{imgs/Instance segmentation.png}
+    \caption{Sample annotated image from the COCO \cite{lin2015microsoftcococommonobjects} dataset with a comparison of common computer vision tasks.}
+\end{figure}
 \chapter{Dataset}
 \label{sec:dataset}
 The analysis of nuclear features in histopathology images has long been recognized as a crucial aspect of cancer research and diagnosis. The part that seems like a bottleneck is the limited size of the most publicy available dataset for nuclei segmentation and classification, and often suffering from sparse labelling or sampling bias.\\
@@ -156,7 +202,7 @@ The PanNuke dataset provides nuclei annotations across 19 tissue types, with eac
 For the purpose of this work, only neoplastic nuclei where considered. This choice was motivated by the specific objective of our study, which focused on identifying and counting malignant cells. In practice, the ground truth masks were converted in bianry masks, where each positive pixel belong to a neoplastic nucleo and the remaining pixels were just merged with the background.\\
 
 By restricting the dataset to neoplstic nuclei, the resulting distribution is imbalanced compared to the full PanNuke schema.
-%% Fine dei capitoli normali, inizio dei capitoli-appendice (opzionali)
+
 \chapter{Methodology}
 \label{sec:methodology}
 The workflow of the proposed project is a standard deep learning pipeline for nuclei segmentation with differential tuning for detecting and counting the neoplastic nuclei in histopathology images.
@@ -171,7 +217,7 @@ The heart of the system is a U-Net \cite{DBLP:journals/corr/RonnebergerFB15} net
 
 \noindent The complete pipeline was run on a workstation having the following hardware components: \begin{itemize} 
     \item \textbf{CPU}: AMD Ryzen 5 9600X, 6C/12T 
-    \item \textbf{GPU}: NVIDIA RTX 3080 Ti 11 GB-core
+    \item \textbf{GPU}: NVIDIA RTX 3080 Ti 11 GB
     \item \textbf{RAM}: 32 GB DDR5, 6000 MHz 
     \item \textbf{OS}: Linux (Ubuntu) 64 bit 
     \item \textbf{CPU Cache}: L3 38 MB 
@@ -556,125 +602,6 @@ To understand the correctly association with the sub-task claimed above, we use 
     \item AJI
 \end{enumerate}
 \chapter{Results}
-\label{sec:results}
-This chapter presents the expertimental results obtained by training and evaluating, multiple semantic segmentation models on the PanNuke dataset described in chapter \ref{sec:dataset}, using the methodology detailed in chapter \ref{sec:methodology}.\\
-We begin by outlining a set of preliminary experiments that assess the impact of different input modalities (RGB, Hematoxylin, Blu colormap, Grayscale) to compare models performances, reporting quantitative results using standard segmentation metrics as described in Section~\ref{sec:metrics}, then analyse the nuclei counting accuracy, and complementing them with qualitative analysis of segmentation outputs on full images.\\
-Unless otherwise stated, post-processing thresholds were set as in Section~\ref{sec:postprocessing}, with the foreground threshold $\theta_1$ tuned on validation by IoU on ground-truth labels and $\theta_2$ as the minimum instance area.
-
-\section{Instance segmentation results}
-The final evaluation on the test set, as shown in tables~\ref{tab:iou-results} and ~\ref{tab:pix-binary}, the model with RGB images achieves the highest scores across all metrics.\\
-Among the remaining input modalities, the Hematoxylin input performs moderately well,  
-Table~\ref{tab:iou-results}  summarizes the instance-level performance using DICE2, AJI and PQ (Section~\ref{sec:evaluation-method}). 
-PQ is further factorized into detection quality (DQ) and segmentation quality (SQ), providing a more interpretable view on missed detections vs. mask quality.
-
-\begin{table}[ht]
-\centering
-\caption{Instance-level segmentation performance across input modalities. Scores are averaged over the test set.}
-\label{tab:iou-results}
-\small
-\begin{tabular}{lccccc}
-\toprule
-\textbf{Input} & \textbf{DICE2} $\uparrow$ & \textbf{AJI} $\uparrow$ & \textbf{DQ} $\uparrow$ & \textbf{SQ} & \textbf{PQ}\\
-\midrule
-RGB         & \textbf{0.607} & \textbf{0.530} & \textbf{0.639} & \textbf{0.701} & \textbf{0.476}\\
-Hematoxylin & 0.599 & 0.515 & 0.622 & 0.687 & 0.456\\
-Blue        & 0.556 & 0.450 & 0.585 & 0.670 & 0.387\\
-Grayscale   & 0.586 & 0.501 & 0.625 & 0.692 & 0.444\\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\noindent\textbf{Discussion.} 
-Consistent with the literature on H\&E images, RGB and Hematoxylin inputs lead to higher PQ and AJI than Blue; Grayscale remains competitive, suggesting that much of the discriminative signal lies in structure rather than color. 
-As discussed in Section~\ref{sec:evaluation-method}, DICE2 and AJI tend to over-penalize overlaps in crowded regions; PQ mitigates this by decoupling detection and mask quality.
-
-Besides instance metrics, we also report a pixel-wise IoU and F1 score on the binary foreground ($\text{body}\cup\text{border}$ vs background), as a sanity check for under/over-segmentation:
-
-\begin{table}[ht]
-\centering
-\caption{Pixel-wise foreground segmentation (binary) on the test set.}
-\label{tab:pix-binary}
-\small
-\begin{tabular}{lcc}
-\toprule
-\textbf{Input} & \textbf{IoU} $\uparrow$ & \textbf{F1} $\uparrow$ \\
-\midrule
-RGB         & \textbf{0.656} & \textbf{0.870} \\
-Hematoxylin & 0.640 & 0.863 \\
-Blue        & 0.582 & 0.834 \\
-Grayscale   & 0.635 & 0.861 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\section{Counting analysis}
-\label{sec:counting-analysis}
-To evaluate the counting performance, we compare the number of predicted instances with the number of ground-truth instances, both obtained after post-processing. 
-Let $\hat{n}_i$ and $n_i$ denote the predicted and ground-truth nuclei counts for image $i$, respectively, with $i=1,\dots,N$.
-
-The following metrics are employed:
-
-\begin{itemize}
-    \item \textbf{Mean Absolute Error (MAE)}: measures the average absolute deviation between predicted and ground-truth counts,
-    \begin{equation}
-        \mathrm{MAE} = \frac{1}{N}\sum_{i=1}^{N} \left| \hat{n}_i - n_i \right|.
-    \end{equation}
-
-    \item \textbf{Pearson correlation coefficient} $\rho$: quantifies the degree of linear correlation between predictions and ground truth,
-    \begin{equation}
-        \rho = \frac{1}{N-1}\sum_{i=1}^N 
-        \left(\frac{\hat{n}_i - \mu_{\hat{n}}}{\sigma_{\hat{n}}}\right)
-        \left(\frac{n_i - \mu_{n}}{\sigma_{n}}\right),
-    \end{equation}
-    where $\mu_{\hat{n}}, \sigma_{\hat{n}}$ are the mean and standard deviation of the predicted counts, and $\mu_{n}, \sigma_{n}$ are the mean and standard deviation of the ground-truth counts.
-
-    \item \textbf{Coefficient of determination} $R^2$: Cell counting performance represents the ability to determine cellular composistion \cite{kirillov2019panoptic}. It can be quantified via the $coefficient\ of\ determination$ $\textbf{R}^2$ to assess the correlation between the predicted and true counts as:
-    \begin{equation}
-        R^2 = 1 - \frac{\sum_{i=1}^N (n_i - \hat{n}_i)^2}{\sum_{i=1}^N (n_i - \mu_{n})^2},
-    \end{equation}
-    where the numerator corresponds to the residual sum of squares (RSS) and the denominator to the total sum of squares (TSS).
-\end{itemize}
-
-\subsection{Scatter plot and global scores}
-Figure~\ref{fig:scatter} shows the scatter of predicted vs. ground-truth nuclei per image, with the identity line as reference.
-We also annotate $\rho$, MAE and $R^2$ in the title for quick comparison across models.
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=.55\linewidth]{imgs/3ch_binarymask.png}
-    \caption{Predicted vs. ground-truth nuclei per image (RGB model). The title reports $\rho$, MAE and $R^2$.}
-    \label{fig:scatter}
-\end{figure}
-\section{Stratified analysis by image characteristics}
-\label{sec:strata}
-To understand failure modes, we stratify images by nuclear size and density. 
-Each image is assigned to one of four categories based on the median of mean nucleus area (\emph{small/large}) and median nearest-neighbour distance (\emph{high/low} density). 
-For each category and model, we report the distribution of counting error using box plots (Figure~\ref{fig:box-cats}).
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=.9\linewidth]{imgs/3ch_binarymask.png}
-    \caption{Counting error grouped by image category (small/large area, high/low density) and input modality (RGB, H, Blue, Gray).}
-    \label{fig:box-cats}
-\end{figure}
-
-\section{Qualitative results}
-Figure~\ref{fig:qualitative} shows representative examples with input image, predicted foreground, HV maps, watershed instance map, and contour overlay. 
-These qualitative results highlight typical success cases (well-separated clusters) and common failure cases (touching nuclei with faint boundaries).
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=.98\linewidth]{imgs/3ch_binarymask.png}
-    \caption{Qualitative examples: input, binary foreground, HV maps, watershed labels, and contours overlay.}
-    \label{fig:qualitative}
-\end{figure}
-
-\section{Summary}
-Overall, RGB input achieves the best trade-off across segmentation and counting metrics, with Hematoxylin close behind. 
-Blue degrades both PQ and counting stability, suggesting that its contrast mapping discards useful chromatic cues for boundary localization. 
-The stratified analysis indicates that errors increase in high-density scenes with small nuclei, where overlaps and weak boundaries are more frequent.
-
-\chapter{Results}
 \label{chap:results}
 
 This chapter presents the expertimental results obtained by training and evaluating, the proposed multi-head U-net model on the PanNuke dataset described in chapter \ref{sec:dataset}, using the methodology detailed in chapter \ref{sec:methodology}.\\
@@ -846,6 +773,8 @@ The Blue variant consistently underestimates across all groups, while RGB and He
 Gray shows intermediate results but with wider error dispersion, especially in the \textbf{large/low-density} category. 
 This analysis highlights that color information not only enhances segmentation but also improves robustness in nuclei counting under challenging conditions.
 \section{Qualitative analysis}
+\chapter{Conclusion}
+%% Fine dei capitoli normali, inizio dei capitoli-appendice (opzionali)
 \appendix
 
 %\part{Appendici}
