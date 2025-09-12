@@ -439,7 +439,7 @@ By combining semantic segmentation (seg\_head) with geometric regression (hv\_he
 This multi-task formulation improves robustness in crowded regions and enhances nuclei counting, while preserving the efficiency of an end-to-end trainable model.
 \begin{figure}[H] % l'opzione [h] cerca di posizionare l'immagine "here"
     \centering
-    \includegraphics[width=1\textwidth]{imgs/binarymask_transform.png}
+    \includegraphics[width=1\textwidth]{imgs/model.png}
     \caption{Model architecture used}
     \label{fig:Unet}
 \end{figure}
@@ -592,7 +592,12 @@ The complete post-processing workflow can be summarized as follows:
     \item Remove small objects and artifacts.
     \item Count nuclei and extract contours for visualization.
 \end{enumerate}
-
+\begin{figure}[H] % l'opzione [h] cerca di posizionare l'immagine "here"
+    \centering
+    \includegraphics[width=1\textwidth]{imgs/overall.png}
+    \caption{Model architecture used}
+    \label{fig:postproc_overview}
+\end{figure}
 An overview of the full process --- from dataset to prediction, instance segmentation, and final counting --- is illustrated in Figure~\ref{fig:postproc_overview}.
 \section{Evaluation Method}
 In order to assess the performance of the model, we utilize both $quantitative$ and $qualitative$ evaluation methods.\\
@@ -674,8 +679,8 @@ PQ is further factorized into detection quality (DQ) and segmentation quality (S
 \toprule
 \textbf{Input} & \textbf{DICE2} $\uparrow$ & \textbf{AJI} $\uparrow$ & \textbf{DQ} $\uparrow$ & \textbf{SQ} & \textbf{PQ}\\
 \midrule
-RGB         & \textbf{0.607} & \textbf{0.530} & \textbf{0.639} & \textbf{0.701} & \textbf{0.476}\\
-Hematoxylin & 0.599 & 0.515 & 0.622 & 0.687 & 0.456\\
+RGB         & \textbf{0.601} & \textbf{0.527} & \textbf{0.640} & \textbf{0.701} & \textbf{0.477}\\
+Hematoxylin & 0.593 & 0.514 & 0.635 & 0.689 & 0.468\\
 Blue        & 0.556 & 0.450 & 0.585 & 0.670 & 0.387\\
 Grayscale   & 0.586 & 0.501 & 0.625 & 0.692 & 0.444\\
 \bottomrule
@@ -698,7 +703,7 @@ Besides instance metrics, we also report a pixel-wise IoU and F1 score on the bi
 \textbf{Input} & \textbf{IoU} $\uparrow$ & \textbf{F1} $\uparrow$ \\
 \midrule
 RGB         & \textbf{0.656} & \textbf{0.870} \\
-Hematoxylin & 0.640 & 0.863 \\
+Hematoxylin & 0.641 & 0.863 \\
 Blue        & 0.582 & 0.834 \\
 Grayscale   & 0.635 & 0.861 \\
 \bottomrule
@@ -743,13 +748,13 @@ The closer the points lie to this line, the more accurate the model prediction.
 
 \begin{minipage}{0.45\textwidth}
     \centering
-    \includegraphics[width=\linewidth]{imgs/3ch_binarymask.png}
+    \includegraphics[width=\linewidth]{imgs/Diffusion_graphics_RGB.png}
     \caption*{RGB} % usa \caption* per didascalia senza numerazione
 \end{minipage}
 \hspace{0.5cm}
 \begin{minipage}{0.45\textwidth}
     \centering
-    \includegraphics[width=\linewidth]{imgs/3ch_binarymask.png}
+    \includegraphics[width=\linewidth]{imgs/grafo_diffusione_HE.png}
     \caption*{H\&E}
 \end{minipage}
 
@@ -757,13 +762,13 @@ The closer the points lie to this line, the more accurate the model prediction.
 
 \begin{minipage}{0.45\textwidth}
     \centering
-    \includegraphics[width=\linewidth]{imgs/3ch_binarymask.png}
+    \includegraphics[width=\linewidth]{imgs/diffusion_graph_blu.png}
     \caption*{Blue channel}
 \end{minipage}
 \hspace{0.5cm}
 \begin{minipage}{0.45\textwidth}
     \centering
-    \includegraphics[width=\linewidth]{imgs/3ch_binarymask.png}
+    \includegraphics[width=\linewidth]{imgs/Diffusion_graph_gray.png}
     \caption*{Grayscale}
 \end{minipage}
 
@@ -784,10 +789,10 @@ The Blue variant shows the weakest performance, while Gray lies in between.
         \hline
         \textbf{Input} & \textbf{MAE} $\downarrow$ & \textbf{$R^2$} $\uparrow$ & \textbf{$\rho$} $\uparrow$ \\
         \hline
-        RGB         & \textbf{5.2} & \textbf{0.92} & \textbf{0.95} \\
-        Hematoxylin & 6.1          & 0.89          & 0.93 \\
-        Blue        & 8.7          & 0.81          & 0.88 \\
-        Gray        & 6.4          & 0.87          & 0.91 \\
+        RGB         & 4.9 & 0.852 & \textbf{0.948} \\
+        Hematoxylin & \textbf{4.7}          & \textbf{0.867}          & 0.948 \\
+        Blue        & 6.2          & 0.789          & 0.925 \\
+        Gray        & 6.3          & 0.790          & 0.929 \\
         \hline
     \end{tabular}
 \end{table}
@@ -804,7 +809,7 @@ Negative errors indicate underestimation, while positive values correspond to ov
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=\textwidth]{imgs/3ch_binarymask.png}
+    \includegraphics[width=\textwidth]{imgs/boxplot.png}
     \caption{Distribution of counting errors by category. Categories are defined by nuclear size (small/large) and density (high/low). Each boxplot corresponds to one preprocessing modality (RGB, H\&E, Blue, Gray).}
     \label{fig:boxplot_categories}
 \end{figure}
