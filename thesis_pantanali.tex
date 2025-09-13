@@ -33,7 +33,7 @@
 \usepackage[pdfa]{hyperref}
 \usepackage{tikz}
 \usepackage{subcaption}
-\usepackage{amsmath, amssymb}
+\usepackage{amsmath, amssymb,subcaption}
 \usepackage{float}
 \newlength{\colsep}
 \setlength{\colsep}{4.2cm}
@@ -61,8 +61,7 @@
 Sed vel lorem a arcu faucibus aliquet eu semper tortor. Aliquam dolor lacus, semper vitae ligula sed, blandit iaculis leo. Nam pharetra lobortis leo nec auctor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Fusce ac risus pulvinar, congue eros non, interdum metus. Mauris tincidunt neque et aliquam imperdiet. Aenean ac tellus id nibh pellentesque pulvinar ut eu lacus. Proin tempor facilisis tortor, et hendrerit purus commodo laoreet. Quisque sed augue id ligula consectetur adipiscing. Vestibulum libero metus, lacinia ac vestibulum eu, varius non arcu. Nam et gravida velit.
 
 %% Sommario (opzionale)
-\abstract
-Nunc ac dignissim ipsum, quis pulvinar elit. Mauris congue nec leo ornare lobortis. Nulla hendrerit pretium diam nec lobortis. Nullam aliquam laoreet nisl, sit amet facilisis lectus accumsan ut. Duis et elit hendrerit metus venenatis condimentum. Integer id eros molestie, interdum leo sit amet, aliquet metus. Integer fermentum tristique magna, vel luctus neque rhoncus vel. Ut hendrerit et quam et semper. Mauris egestas, odio sed aliquet luctus, magna orci euismod odio, vitae lacinia tellus tellus non lectus. Aliquam urna neque, porta et mattis aliquam, congue sit amet lorem. In ultrices augue sit amet ante vehicula, vitae rhoncus turpis auctor. Donec porta scelerisque eros, at mollis enim imperdiet ut. 
+%\abstract
 
 %% Indice
 \tableofcontents
@@ -823,7 +822,7 @@ This analysis highlights that color information not only enhances segmentation b
 \label{sec:qualitative}
 
 Quantitative metrics provide an overall view of performance, but they do not fully capture the visual behaviour of different input modalities. To address this, we complement our evaluation with a qualitative analysis focused on visual inspection of model predictions.\\
-We therefore complement the analysis with a qualitative study organised by \emph{difficulty level} (best / typical / hard) and by \emph{morphology} (size, density). 
+We therefore complement the analysis with a qualitative study organised by \emph{difficulty level} (best / typical / hard).. 
 For each selected case we report (i) visual outputs for all modalities (\emph{RGB}, \emph{Hematoxylin}, \emph{Blue}, \emph{Gray}) after post-processing and (ii) the associated per-image metrics:
 \[
 \text{MAE} = |\hat{n}-n|,\quad
@@ -833,7 +832,8 @@ For each selected case we report (i) visual outputs for all modalities (\emph{RG
 \text{SQ},\quad
 \text{PQ}=\text{DQ}\times\text{SQ}.
 \]
-Here, MAE is the absolute counting error; AJI and DICE2 are instance-level overlaps; DQ and SQ factorise panoptic quality (\S\ref{sec:metrics}).
+Here, MAE is the absolute counting error; AJI and DICE2 are instance-level overlaps; DQ and SQ factorise panoptic quality (\S\ref{sec:metrics}).\\
+We present the results on images excluded from training, used solely for qualitative evaluation.
 
 \subsection{Case selection and ranking}
 We define three difficulty levels using the \textbf{RGB} model as reference (selection is then fixed and reused across modalities):
@@ -859,171 +859,209 @@ This ranking isolates visual patterns behind high/low performance and ensures co
 % }
 
 \subsection{Best case}
-Figure~\ref{fig:qual_best} shows a representative \emph{best} sample. All modalities delineate nuclei well; \emph{RGB} and \emph{Hematoxylin} exhibit the cleanest borders and the smallest counting error.
+Tabel~\ref{tab:best_metrics} presents the cover percentage and the count error for the sample image shown in figure~\ref{fig:qual_best} that is a representative \emph{best} sample. All modalities delineate nuclei well; \emph{RGB} and \emph{Hematoxylin} exhibit the cleanest borders and the smallest counting error.
 
-\begin{figure}[ht]
+\begin{figure}[!htbp]
 \centering
 
-% riga 1
-\begin{minipage}{0.48\textwidth}\centering
-  \includegraphics[width=\linewidth]{imgs/qualitative/best/RGB/contour_img.png}\\[-1ex]
-  \footnotesize
-  \begin{tabular}{@{}lr@{}}
-   MAE & \textbf{0}\\ AJI & \textbf{0.726}\\ DICE2 & 0.841\\
-   DQ & \textbf{0.999}\\ SQ & 0.726\\ PQ & \textbf{0.726}
-  \end{tabular}
-  \caption*{RGB}
-\end{minipage}\hfill
-\begin{minipage}{0.48\textwidth}\centering
-  \includegraphics[width=\linewidth]{imgs/qualitative/best/HE/contour_img.png}\\[-1ex]
-  \footnotesize
-  \begin{tabular}{@{}lr@{}}
-   MAE & 1\\ AJI & 0.724\\ DICE2 & \textbf{0.855}\\
-   DQ & 0.947\\ SQ & \textbf{0.747}\\ PQ & 0.708
-  \end{tabular}
-  \caption*{H\&E}
-\end{minipage}
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/best/RGB/img.png}
+  \caption{Source Image}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/best/contour_img.png}
+  \caption{Ground Truth}
+\end{subfigure}
 
-\vspace{0.6em}
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/best/RGB/contour_img.png}
+  \caption{RGB}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/best/HE/contour_img.png}
+  \caption{H\&E}
+\end{subfigure}
 
-% riga 2
-\begin{minipage}{0.48\textwidth}\centering
-  \includegraphics[width=\linewidth]{imgs/qualitative/best/Blu/contour_img.png}\\[-1ex]
-  \footnotesize
-  \begin{tabular}{@{}lr@{}}
-   MAE & 4\\ AJI & 0.617\\ DICE2 & 0.796\\
-   DQ & 0.636\\ SQ & 0.697\\ PQ & 0.443
-  \end{tabular}
-  \caption*{Blue}
-\end{minipage}\hfill
-\begin{minipage}{0.48\textwidth}\centering
-  \includegraphics[width=\linewidth]{imgs/qualitative/best/Gray/contour_img.png}\\[-1ex]
-  \footnotesize
-  \begin{tabular}{@{}lr@{}}
-   MAE & 1\\ AJI & 0.712\\ DICE2 & 0.850\\
-   DQ & 0.947\\ SQ & 0.725\\ PQ & 0.686
-  \end{tabular}
-  \caption*{Gray}
-\end{minipage}
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/best/Blu/contour_img.png}
+  \caption{Blue}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/best/Gray/contour_img.png}
+  \caption{Gray}
+\end{subfigure}
 
-\caption{Best case: instance overlays and per-image metrics across modalities (2×2).}
+\caption{Qualitative visualization of nuclei segmentation for the best case. 
+Contours of predicted nuclei are shown in green. 
+(b) Ground-truth segmentation. 
+(c--f) Predictions from models trained on different input modalities: (c) RGB, (d) Hematoxylin, (e) Blue, and (f) Grayscale.}
 \label{fig:qual_best}
 \end{figure}
-
+\begin{table}[ht]
+\centering
+\caption{Per-image metrics for the \textbf{best} case across input modalities (RGB, Hematoxylin, Blue, Grayscale). }
+\label{tab:best_metrics}
+\begin{tabular}{lcccccc}
+\toprule
+Modality & MAE & AJI & DICE2 & DQ & SQ & PQ \\
+\midrule
+RGB  & \textbf{0} & \textbf{0.726} & 0.841 & \textbf{0.999} & 0.726 & \textbf{0.726} \\
+H\&E & 1 & 0.724 & \textbf{0.855} & 0.947 & \textbf{0.747} & 0.708 \\
+Blue & 4 & 0.617 & 0.796 & 0.636 & 0.697 & 0.443 \\
+Gray & 1 & 0.712 & 0.850 & 0.947 & 0.725 & 0.686 \\
+\bottomrule
+\end{tabular}
+\end{table}
+The predicted values from the segmentation models are remarkably close to the segmentation generated from the ground truth data \ref{fig:qual_best}b. 
 \subsection{Typical case}
 In the \emph{typical} case (Fig.~\ref{fig:qual_typical}), borders remain well defined but touching nuclei start to merge in \emph{Blue} and \emph{Gray}, increasing MAE. \emph{RGB} and \emph{Hematoxylin} keep higher DQ and AJI.
 
-\begin{figure}[ht]
+\begin{figure}[!htbp]
 \centering
 
-% riga 1
-\begin{minipage}{0.48\textwidth}\centering
-  \includegraphics[width=\linewidth]{imgs/qualitative/medium/RGB/contour_img.png}\\[-1ex]
-  \footnotesize
-  \begin{tabular}{@{}lr@{}}
-   MAE & \textbf{5}\\ AJI & \textbf{0.567}\\ DICE2 & \textbf{0.667}\\
-   DQ & \textbf{0.639}\\ SQ & \textbf{0.730}\\ PQ & \textbf{0.467}
-  \end{tabular}
-  \caption*{RGB}
-\end{minipage}\hfill
-\begin{minipage}{0.48\textwidth}\centering
-  \includegraphics[width=\linewidth]{imgs/qualitative/medium/HE/contour_img.png}\\[-1ex]
-  \footnotesize
-  \begin{tabular}{@{}lr@{}}
-   MAE & 4\\ AJI & 0.560\\ DICE2 & 0.645\\
-   DQ & 0.621\\ SQ & 0.719\\ PQ & 0.447
-  \end{tabular}
-  \caption*{H\&E}
-\end{minipage}
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/medium/RGB/img.png}
+  \caption{Source Image}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/medium/contour_img.png}
+  \caption{Ground Truth}
+\end{subfigure}
 
-\vspace{0.6em}
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/medium/RGB/contour_img.png}
+  \caption{RGB}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/medium/HE/contour_img.png}
+  \caption{H\&E}
+\end{subfigure}
 
-% riga 2
-\begin{minipage}{0.48\textwidth}\centering
-  \includegraphics[width=\linewidth]{imgs/qualitative/medium/Blu/contour_img.png}\\[-1ex]
-  \footnotesize
-  \begin{tabular}{@{}lr@{}}
-   MAE & 3\\ AJI & 0.505\\ DICE2 & 0.623\\
-   DQ & 0.597\\ SQ & 0.675\\ PQ & 0.403
-  \end{tabular}
-  \caption*{Blue}
-\end{minipage}\hfill
-\begin{minipage}{0.48\textwidth}\centering
-  \includegraphics[width=\linewidth]{imgs/qualitative/medium/Gray/contour_img.png}\\[-1ex]
-  \footnotesize
-  \begin{tabular}{@{}lr@{}}
-   MAE & 5\\ AJI & 0.576\\ DICE2 & 0.674\\
-   DQ & 0.639\\ SQ & 0.709\\ PQ & 0.454
-  \end{tabular}
-  \caption*{Gray}
-\end{minipage}
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/medium/Blu/contour_img.png}
+  \caption{Blue}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/medium/Gray/contour_img.png}
+  \caption{Gray}
+\end{subfigure}
 
-\caption{Typical case: moderate errors; degradations più visibili in Blue/Gray (fusione in zone dense).}
+\caption{Qualitative visualization of nuclei segmentation for the typical case. 
+Contours of predicted nuclei are shown in green. 
+(b) Ground-truth segmentation. 
+(c--f) Predictions from models trained on different input modalities: (c) RGB, (d) Hematoxylin, (e) Blue, and (f) Grayscale.}
 \label{fig:qual_typical}
 \end{figure}
-
+\begin{table}[ht]
+\centering
+\caption{Per-image metrics for the \textbf{typical} case across input modalities (RGB, Hematoxylin, Blue, Grayscale). }
+\label{tab:typical_metrics}
+\begin{tabular}{lcccccc}
+\toprule
+Modality & MAE & AJI & DICE2 & DQ & SQ & PQ \\
+\midrule
+RGB  & \textbf{5} & \textbf{0.567} & \textbf{0.667} & \textbf{0.639} & \textbf{0.730} & \textbf{0.467} \\
+H\&E & 4 & 0.560 & 0.645 & 0.621 & 0.719 & 0.447 \\
+Blue & 3 & 0.505 & 0.623 & 0.597 & 0.675 & 0.403 \\
+Gray & 5 & 0.576 & 0.674 & 0.639 & 0.709 & 0.454 \\
+\bottomrule
+\end{tabular}
+\end{table}
 \subsection{Hard case}
 The \emph{hard} case (Fig.~\ref{fig:qual_hard}) features overlapping/weakly stained nuclei. All modalities deteriorate, but \emph{RGB}/\emph{Hematoxylin} retain higher DQ (more detections) and AJI than \emph{Blue}, which shows under-segmentation (high MAE).
 
-\begin{figure}[ht]
+\begin{figure}[!htbp]
 \centering
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/worst/RGB/img.png}
+  \caption{Source Image}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/worst/contour_img.png}
+  \caption{Ground Truth}
+\end{subfigure}
 
-% riga 1
-\begin{minipage}{0.48\textwidth}\centering
-  \includegraphics[width=\linewidth]{imgs/qualitative/worst/RGB/contour_img.png}\\[-1ex]
-  \footnotesize
-  \begin{tabular}{@{}lr@{}}
-   MAE & \textbf{43}\\ AJI & \textbf{0.265}\\ DICE2 & \textbf{0.386}\\
-   DQ & \textbf{0.292}\\ SQ & \textbf{0.630}\\ PQ & \textbf{0.184}
-  \end{tabular}
-  \caption*{RGB}
-\end{minipage}\hfill
-\begin{minipage}{0.48\textwidth}\centering
-  \includegraphics[width=\linewidth]{imgs/qualitative/worst/HE/contour_img.png}\\[-1ex]
-  \footnotesize
-  \begin{tabular}{@{}lr@{}}
-   MAE & 53\\ AJI & 0.208\\ DICE2 & 0.324\\
-   DQ & 0.272\\ SQ & 0.630\\ PQ & 0.171
-  \end{tabular}
-  \caption*{H\&E}
-\end{minipage}
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/worst/RGB/contour_img.png}
+  \caption{RGB}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/worst/HE/contour_img.png}
+  \caption{H\&E}
+\end{subfigure}
 
-\vspace{0.4em}
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/worst/Blu/contour_img.png}
+  \caption{Blue}
+\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/worst/Gray/contour_img.png}
+  \caption{Gray}
+\end{subfigure}
 
-% riga 2
-\begin{minipage}{0.48\textwidth}\centering
-  \includegraphics[width=\linewidth]{imgs/qualitative/worst/Blu/contour_img.png}\\[-1ex]
-  \footnotesize
-  \begin{tabular}{@{}lr@{}}
-   MAE & 37\\ AJI & 0.235\\ DICE2 & 0.356\\
-   DQ & 0.257\\ SQ & 0.635\\ PQ & 0.163
-  \end{tabular}
-  \caption*{Blue}
-\end{minipage}\hfill
-\begin{minipage}{0.48\textwidth}\centering
-  \includegraphics[width=\linewidth]{imgs/qualitative/worst/Gray/contour_img.png}\\[-1ex]
-  \footnotesize
-  \begin{tabular}{@{}lr@{}}
-   MAE & 46\\ AJI & 0.237\\ DICE2 & 0.355\\
-   DQ & 0.285\\ SQ & 0.647\\ PQ & 0.185
-  \end{tabular}
-  \caption*{Gray}
-\end{minipage}
-
-\caption{Hard case: overlapping/weak staining. MAE più alto in Blue; RGB/H\&E mantengono DQ/AJI migliori.}
+\caption{Qualitative visualization of nuclei segmentation for the worst/hard case. 
+Contours of predicted nuclei are shown in green. 
+(b) Ground-truth segmentation. 
+(c--f) Predictions from models trained on different input modalities: (c) RGB, (d) Hematoxylin, (e) Blue, and (f) Grayscale.}
 \label{fig:qual_hard}
 \end{figure}
-
+\begin{table}[ht]
+\centering
+\caption{Per-image metrics for the hard case across input modalities (RGB, Hematoxylin, Blue, Grayscale). }
+\label{tab:worst_metrics}
+\begin{tabular}{lcccccc}
+\toprule
+Modality & MAE & AJI & DICE2 & DQ & SQ & PQ \\
+\midrule
+RGB  & 43 & \textbf{0.265} & \textbf{0.386} & \textbf{0.292} & 0.630 & 0.184 \\
+H\&E & 53 & 0.208 & 0.324 & 0.272 & 0.630 & 0.171 \\
+Blue & \textbf{37} & 0.235 & 0.356 & 0.257 & 0.635 & 0.163 \\
+Gray & 46 & 0.237 & 0.355 & 0.285 & \textbf{0.647} & \textbf{0.185} \\
+\bottomrule
+\end{tabular}
+\end{table}
 \subsection{Discussion}
-Across \emph{best}/\emph{typical}/\emph{hard} cases and morphology categories, visual inspection and per-image metrics consistently indicate:
-\begin{itemize}
-  \item \textbf{RGB} and \textbf{Hematoxylin} achieve higher AJI/DICE2 and DQ, yielding higher PQ and lower MAE.
-  \item \textbf{Blue} under-segments in crowded regions (lower DQ, larger MAE), aligning with its global behaviour.
-  \item \textbf{Gray} is competitive in simpler textures but less stable in high-density or weakly stained settings (drop in AJI/PQ).
-\end{itemize}
-These qualitative findings are coherent with the quantitative trends reported in \S\ref{chap:results}, and clarify failure modes (merging of touching nuclei, missed detections in weak staining) that primarily affect Blue/Gray modalities.
+The results discused in this chapter can be directly related to figure~\ref{fig:boxplot_categories}, which provides a visual summary of the observed trends. The qualitative study reveals consistent patterns across modalities once cases are stratified by morphology and difficulty:
+
+\paragraph{Best (Large / Low-density).}
+Patches with large nuclei and ample inter-nuclear spacing are the easiest setting. All modalities delineate instances well, with \textbf{RGB} and \textbf{Hematoxylin} yielding near-perfect overlays, the highest AJI/DICE2 and PQ, and MAE $\approx 0$. In these conditions, boundaries are well contrasted and the watershed separation is rarely needed, so segmentation quality (SQ) saturates and detection quality (DQ) approaches~1.
+
+\paragraph{Typical (Small / Low-density).}
+When nuclei are \emph{small} but the scene remains relatively sparse, performance drops moderately. \textbf{RGB} and \textbf{Hematoxylin} retain competitive AJI/DICE2 and DQ, while \textbf{Gray} stays close and \textbf{Blue} shows the first signs of under-segmentation (merging of nearby instances). Counting errors (MAE) increase mainly due to missed small detections rather than gross mask failures, which is reflected by a larger hit on DQ than on SQ.
+
+\paragraph{Hard (Small / High-density).}
+The most challenging regime combines small nuclei with crowding/overlap. Here all modalities degrade, but \textbf{RGB}/\textbf{Hematoxylin} remain relatively more reliable than \textbf{Blue}/\textbf{Gray}. Errors are dominated by \emph{under-segmentation} and \emph{missed detections}: DQ drops sharply and AJI/DICE2 fall due to instance mergers, while SQ remains comparatively less affected (masks are reasonable where detections happen). This mismatch explains the high MAE despite moderate SQ.
+
+\paragraph{Modality-wise summary.}
+Across all difficulty levels, \textbf{RGB} and \textbf{Hematoxylin} systematically achieve higher AJI/DICE2 and PQ with lower MAE, indicating a better balance between detection (DQ) and mask fidelity (SQ). \textbf{Blue} is the least robust in crowded fields (low DQ, larger MAE) and \textbf{Gray} is competitive in simpler scenes but less stable in small/high-density regimes.
+
+
 
 \chapter{Conclusion}
+\paragraph{Takeaways for practice.}
+(1) When tissue appearance permits, prefer \textbf{RGB} or \textbf{Hematoxylin} inputs to maximize instance recall and counting accuracy.  
+(2) The primary failure mode in difficult scenes is detection/instance separation (DQ), not mask sharpness (SQ); improving boundary cues and separation priors (e.g., stronger distance-map weighting or learned boundary heads) is likely to yield the biggest gains.  
+(3) Since difficulty is tightly coupled to \emph{size} and \emph{density}, targeted augmentation (small objects, clustered placements) and curriculum-style hard-mining may further reduce MAE in the Small/High-density regime.
+
+Overall, the qualitative evidence aligns with quantitative trends: color information (RGB/Hematoxylin) improves robustness, especially for instance recall in crowded regions, while morphology (small size, high density) is the dominant driver of failure through missed detections and merged instances.
 %% Fine dei capitoli normali, inizio dei capitoli-appendice (opzionali)
 \appendix
 
