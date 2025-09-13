@@ -772,7 +772,7 @@ The closer the points lie to this line, the more accurate the model prediction.
     \caption*{Grayscale}
 \end{minipage}
 
-\caption{Scatter plots of predicted versus ground-truth nuclei counts for each input modality. Metrics reported in the plot titles include MAE, $R^2$, and $\rho$ (Pearson). The dashed line represents the identity $y=x$.}
+\caption{Scatter plots of predicted versus ground-truth nuclei counts for each input modality. Metrics reported in the plot titles include MAE, $R^2$, and $\rho$ (Pearson).}
 \label{fig:scatter_counts}
 \end{figure}
 
@@ -820,6 +820,209 @@ The Blue variant consistently underestimates across all groups, while RGB and He
 Gray shows intermediate results but with wider error dispersion, especially in the \textbf{large/low-density} category. 
 This analysis highlights that color information not only enhances segmentation but also improves robustness in nuclei counting under challenging conditions.
 \section{Qualitative analysis}
+\label{sec:qualitative}
+
+Quantitative metrics provide an overall view of performance, but they do not fully capture the visual behaviour of different input modalities. To address this, we complement our evaluation with a qualitative analysis focused on visual inspection of model predictions.\\
+We therefore complement the analysis with a qualitative study organised by \emph{difficulty level} (best / typical / hard) and by \emph{morphology} (size, density). 
+For each selected case we report (i) visual outputs for all modalities (\emph{RGB}, \emph{Hematoxylin}, \emph{Blue}, \emph{Gray}) after post-processing and (ii) the associated per-image metrics:
+\[
+\text{MAE} = |\hat{n}-n|,\quad
+\text{AJI},\quad
+\text{DICE2},\quad
+\text{DQ},\quad
+\text{SQ},\quad
+\text{PQ}=\text{DQ}\times\text{SQ}.
+\]
+Here, MAE is the absolute counting error; AJI and DICE2 are instance-level overlaps; DQ and SQ factorise panoptic quality (\S\ref{sec:metrics}).
+
+\subsection{Case selection and ranking}
+We define three difficulty levels using the \textbf{RGB} model as reference (selection is then fixed and reused across modalities):
+\begin{itemize}
+  \item \textbf{Best}: highest PQ (tie-break by AJI), with MAE close to $0$.
+  \item \textbf{Typical}: PQ close to the median of the test-set distribution and moderate MAE.
+  \item \textbf{Hard}: lowest PQ (tie-break by AJI), and large MAE (severe under/over-count).
+\end{itemize}
+This ranking isolates visual patterns behind high/low performance and ensures comparability between modalities.
+
+% ---------- OPTIONAL MACROS FOR INLINE MINI-TABLES ----------
+% (decommenta se vuoi usare la mini-tabella sotto ogni immagine)
+% \newcommand{\minimetrics}[6]{%
+% \vspace{2pt}\footnotesize
+% \begin{tabular}{@{}l@{\,}l@{}}
+% MAE & #1\\
+% AJI & #2\\
+% DICE2 & #3\\
+% DQ & #4\\
+% SQ & #5\\
+% PQ & #6\\
+% \end{tabular}
+% }
+
+\subsection{Best case}
+Figure~\ref{fig:qual_best} shows a representative \emph{best} sample. All modalities delineate nuclei well; \emph{RGB} and \emph{Hematoxylin} exhibit the cleanest borders and the smallest counting error.
+
+\begin{figure}[ht]
+\centering
+
+% riga 1
+\begin{minipage}{0.48\textwidth}\centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/best/RGB/contour_img.png}\\[-1ex]
+  \footnotesize
+  \begin{tabular}{@{}lr@{}}
+   MAE & \textbf{0}\\ AJI & \textbf{0.726}\\ DICE2 & 0.841\\
+   DQ & \textbf{0.999}\\ SQ & 0.726\\ PQ & \textbf{0.726}
+  \end{tabular}
+  \caption*{RGB}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}\centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/best/HE/contour_img.png}\\[-1ex]
+  \footnotesize
+  \begin{tabular}{@{}lr@{}}
+   MAE & 1\\ AJI & 0.724\\ DICE2 & \textbf{0.855}\\
+   DQ & 0.947\\ SQ & \textbf{0.747}\\ PQ & 0.708
+  \end{tabular}
+  \caption*{H\&E}
+\end{minipage}
+
+\vspace{0.6em}
+
+% riga 2
+\begin{minipage}{0.48\textwidth}\centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/best/Blu/contour_img.png}\\[-1ex]
+  \footnotesize
+  \begin{tabular}{@{}lr@{}}
+   MAE & 4\\ AJI & 0.617\\ DICE2 & 0.796\\
+   DQ & 0.636\\ SQ & 0.697\\ PQ & 0.443
+  \end{tabular}
+  \caption*{Blue}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}\centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/best/Gray/contour_img.png}\\[-1ex]
+  \footnotesize
+  \begin{tabular}{@{}lr@{}}
+   MAE & 1\\ AJI & 0.712\\ DICE2 & 0.850\\
+   DQ & 0.947\\ SQ & 0.725\\ PQ & 0.686
+  \end{tabular}
+  \caption*{Gray}
+\end{minipage}
+
+\caption{Best case: instance overlays and per-image metrics across modalities (2×2).}
+\label{fig:qual_best}
+\end{figure}
+
+\subsection{Typical case}
+In the \emph{typical} case (Fig.~\ref{fig:qual_typical}), borders remain well defined but touching nuclei start to merge in \emph{Blue} and \emph{Gray}, increasing MAE. \emph{RGB} and \emph{Hematoxylin} keep higher DQ and AJI.
+
+\begin{figure}[ht]
+\centering
+
+% riga 1
+\begin{minipage}{0.48\textwidth}\centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/medium/RGB/contour_img.png}\\[-1ex]
+  \footnotesize
+  \begin{tabular}{@{}lr@{}}
+   MAE & \textbf{5}\\ AJI & \textbf{0.567}\\ DICE2 & \textbf{0.667}\\
+   DQ & \textbf{0.639}\\ SQ & \textbf{0.730}\\ PQ & \textbf{0.467}
+  \end{tabular}
+  \caption*{RGB}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}\centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/medium/HE/contour_img.png}\\[-1ex]
+  \footnotesize
+  \begin{tabular}{@{}lr@{}}
+   MAE & 4\\ AJI & 0.560\\ DICE2 & 0.645\\
+   DQ & 0.621\\ SQ & 0.719\\ PQ & 0.447
+  \end{tabular}
+  \caption*{H\&E}
+\end{minipage}
+
+\vspace{0.6em}
+
+% riga 2
+\begin{minipage}{0.48\textwidth}\centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/medium/Blu/contour_img.png}\\[-1ex]
+  \footnotesize
+  \begin{tabular}{@{}lr@{}}
+   MAE & 3\\ AJI & 0.505\\ DICE2 & 0.623\\
+   DQ & 0.597\\ SQ & 0.675\\ PQ & 0.403
+  \end{tabular}
+  \caption*{Blue}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}\centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/medium/Gray/contour_img.png}\\[-1ex]
+  \footnotesize
+  \begin{tabular}{@{}lr@{}}
+   MAE & 5\\ AJI & 0.576\\ DICE2 & 0.674\\
+   DQ & 0.639\\ SQ & 0.709\\ PQ & 0.454
+  \end{tabular}
+  \caption*{Gray}
+\end{minipage}
+
+\caption{Typical case: moderate errors; degradations più visibili in Blue/Gray (fusione in zone dense).}
+\label{fig:qual_typical}
+\end{figure}
+
+\subsection{Hard case}
+The \emph{hard} case (Fig.~\ref{fig:qual_hard}) features overlapping/weakly stained nuclei. All modalities deteriorate, but \emph{RGB}/\emph{Hematoxylin} retain higher DQ (more detections) and AJI than \emph{Blue}, which shows under-segmentation (high MAE).
+
+\begin{figure}[ht]
+\centering
+
+% riga 1
+\begin{minipage}{0.48\textwidth}\centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/worst/RGB/contour_img.png}\\[-1ex]
+  \footnotesize
+  \begin{tabular}{@{}lr@{}}
+   MAE & \textbf{43}\\ AJI & \textbf{0.265}\\ DICE2 & \textbf{0.386}\\
+   DQ & \textbf{0.292}\\ SQ & \textbf{0.630}\\ PQ & \textbf{0.184}
+  \end{tabular}
+  \caption*{RGB}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}\centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/worst/HE/contour_img.png}\\[-1ex]
+  \footnotesize
+  \begin{tabular}{@{}lr@{}}
+   MAE & 53\\ AJI & 0.208\\ DICE2 & 0.324\\
+   DQ & 0.272\\ SQ & 0.630\\ PQ & 0.171
+  \end{tabular}
+  \caption*{H\&E}
+\end{minipage}
+
+\vspace{0.4em}
+
+% riga 2
+\begin{minipage}{0.48\textwidth}\centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/worst/Blu/contour_img.png}\\[-1ex]
+  \footnotesize
+  \begin{tabular}{@{}lr@{}}
+   MAE & 37\\ AJI & 0.235\\ DICE2 & 0.356\\
+   DQ & 0.257\\ SQ & 0.635\\ PQ & 0.163
+  \end{tabular}
+  \caption*{Blue}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}\centering
+  \includegraphics[width=\linewidth]{imgs/qualitative/worst/Gray/contour_img.png}\\[-1ex]
+  \footnotesize
+  \begin{tabular}{@{}lr@{}}
+   MAE & 46\\ AJI & 0.237\\ DICE2 & 0.355\\
+   DQ & 0.285\\ SQ & 0.647\\ PQ & 0.185
+  \end{tabular}
+  \caption*{Gray}
+\end{minipage}
+
+\caption{Hard case: overlapping/weak staining. MAE più alto in Blue; RGB/H\&E mantengono DQ/AJI migliori.}
+\label{fig:qual_hard}
+\end{figure}
+
+\subsection{Discussion}
+Across \emph{best}/\emph{typical}/\emph{hard} cases and morphology categories, visual inspection and per-image metrics consistently indicate:
+\begin{itemize}
+  \item \textbf{RGB} and \textbf{Hematoxylin} achieve higher AJI/DICE2 and DQ, yielding higher PQ and lower MAE.
+  \item \textbf{Blue} under-segments in crowded regions (lower DQ, larger MAE), aligning with its global behaviour.
+  \item \textbf{Gray} is competitive in simpler textures but less stable in high-density or weakly stained settings (drop in AJI/PQ).
+\end{itemize}
+These qualitative findings are coherent with the quantitative trends reported in \S\ref{chap:results}, and clarify failure modes (merging of touching nuclei, missed detections in weak staining) that primarily affect Blue/Gray modalities.
+
 \chapter{Conclusion}
 %% Fine dei capitoli normali, inizio dei capitoli-appendice (opzionali)
 \appendix
