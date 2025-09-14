@@ -16,7 +16,7 @@
 \title{Automatic Nuclei Segmentation and Counting in Histopathology Images with U-Net}
 \author{Pantanali Riccardo}
 \supervisor{Prof.\ Della Mea Vincenzo}
-\cosupervisor{Dott.ssa \ Teresa Pace}
+\cosupervisor{Dr.\ Teresa Pace}
 \tutor{Guido Necchi}
 %% Campi obbligatori: \title, \author e \course.
 %% Altri campi disponibili: \reviewer, \tutor, \chair, \date (anno accademico, calcolato in automatico), \rights
@@ -111,11 +111,32 @@ The rest of this thesis is structured as follows:
 \end{itemize}
 \chapter{Theoretical aspect}
 \label{sec:theory}
-This chapter introduces the theoretical foundations required to understand the methods and experiments presented in this thesis. 
-We begin with an overview of digital histopathology, highlighting the role of hematoxylin and eosin (H\&E) staining in emphasizing nuclear morphology and motivating the use of color deconvolution techniques to isolate relevant channels such as hematoxylin, blue, and grayscale representations. 
-We then provide the necessary background on convolutional neural networks (CNNs) and encoder-decoder architectures, with particular attention to the U-Net model and its extensions for biomedical image segmentation. 
-Then we outline post-processing strategies such as distance map regression and watershed transforms, which play a crucial role in refining segmentation outputs and enabling accurate nuclei counting.
+In this chapter we provide the theoretical basis for methods and experiments in this dissertation.
+We first present a brief introduction to digital histopathology, in which we emphasize the importance of the hematoxylin and eosin (H\&E) staining process for its emphasis on nuclear morphology, as well as its potential motivation for adopting color deconvolution techniques to extract meaningful channels such as hematoxylin, blue and grayscale representations.
+We start background section with an overview of CNNs and encoder-decoder networks, focusing specifically on the U-Net architecture and its extensions to biomedical image segmentation.
+We then describe post processing techniques including distance map regression and watershed transform which are essential for improving the segmentation result, thus achieving more accurate nuclei counting.
 \section{Color deconvolution}
+Hematoxylin and Eosin (H\&E) staining are the most common practices in histopathology.
+Hematoxylin binds to nucleic acids, resulting in a blue-purple color that highlights cell nuclei, and Eosin stains proteins and extracellular structures shades of pink.
+This secondary stain offers pathologists a dark background with which to contrast tissue architecture and cellular shape, the foundation of the practice.
+
+Raw H\&E images in the RGB color space are very challenging from a computational point of view.
+Overlapping of Hematoxylin and Eosin absorption spectra leads to mixed pixel intensities, so that nuclei are less separated from the surrounding cytoplasmic or stromal content.
+Furthermore, as staining procedures, slide making and scanner types differ the additional colour variability may compromise the robustness of automatic analysis.
+\subsection{Motivation in deep learning}
+Color deconvolution has recently renewed attention as image analysis tool in the field of deep learning in digital pathology.
+Convolutional Neural Networks (CNNs) are sensitive to the color statistics of the training data; thus, models trained using raw RGB images may have difficulty generalizing across datasets with staining or acquisition variation \cite{ciompi2017importance, tellez2020quantifying, vahadane2016structure}.
+Color deconvolution: Stain-normalized or stain-isolated representations are provided so that colorWithRed, green, and blue can be reliably separated into separate images.
+\begin{itemize}
+\item \textbf{Facilitates nuclei segmentation}: Hematoxylin shows nuclear morphology assisting the model to focus more on diagnostically important areas.
+\item \textbf{Reduction of domain shift}: transformed samples have reduced inter-laboratory variability which makes the models more robust to unseen datasets.
+\item \textbf{Supports multi-modal training}: networks can be trained on different input representations (RGB, Hematoxylin-only, gray scale), allowing for systematic assessment of the color information in model performance.
+\end{itemize}
+ 
+Indeed, taking the Hematoxylin channel has been proven to decrease the number of false positives within non-nuclear regions, and grayscale or blue colormap transformations also provide natural baselines with which to evaluate models’ reliance on color cues.
+ 
+For instance, extracting the Hematoxylin channel has been shown to reduce false positives in non-nuclear regions, while grayscale or blue colormap transformations provide additional baselines to test the dependence of models on color cues.  
+
 \section{Computer vision}
 Computeer vision is a field of study that enables computers to interpret and make decisions based on visual data as images or videos. It encompasses a wide range of tasks, including object detection, image classification. segmentation, and traking. The ultimate goal of computer vision is to replicate and eventually surpass human visual understanding. \\
 Traditionally. computer vision system relied on hand-crafted features and classical algorithms to extract and process visual information. While these techniques achieved some success, they required significant domain expertise and manual effort and often struggled with generalization to real-world data \cite{lecun2015deep}.\\
@@ -159,15 +180,102 @@ CNNs leverage hierarchical feature extraction, capturing local features initiall
     \caption{Basic CNN architecture. Reproduce from researchgate.com}
 \end{figure}
 \subsection{Segmentation architecture}
-A \textbf{segmentation architecture} is the component of semantic segmentation model that converts high-level feature maps from the encoder into pixel-wise class predictions. While the encoder focuses on extracting semantic information by downsampling the input,the segmentation architecture restores spatial resoltion to produce segmentation masks.\\
-Typical segmentation architecture designs use a combination of upsampling layers, skip connections, and convolutions to progressively refine features and recover spatial details. The choice of the architecture affects both the accuracy and efficiency of the segmentation model. \\
-For this work there are several widley used CNN-base segmentation architectures, including UNet, and UNet++. As described in chapter \ref{sec:model} we used a UNet with two heads.\\
+A \textbf{segmentation architecture} refers to the part of a semantic segmentation model responsible for transforming high-level feature maps from the encoder into pixel-wise class predictions. While the encoder emphasizes extracting semantic information by downsampling the input, the segmentation architecture enhances spatial resolution to generate segmentation masks.
+
+Common designs for segmentation architectures typically incorporate a mix of upsampling layers, skip connections, and convolutions to progressively refine features and regain spatial details. The selected architecture plays a crucial role in determining both the accuracy and efficiency of the segmentation model.
+
+In this study, we explore several widely utilized CNN-based segmentation architectures, such as UNet and UNet++. As detailed in chapter \ref{sec:model}, we employed a UNet with two heads.\\
 
 \noindent\textbf{UNet}\\
+\noindent UNet is a CNN architecture specifically tailored for semantic segmentation tasks, particularly in biomedical image analysis. Introduced in \cite{DBLP:journals/corr/RonnebergerFB15}, it aims to tackle the challenge of achieving precise pixel-level segmentation with limited data.
 
-\noindent UNet is a CNN architecture specifically designed for instance segmentation tasks, pariomedical image analysis. It was introduced in \cite{DBLP:journals/corr/RonnebergerFB15} to address the challenge of achieving precise pixel-level segmentation with limited data. 
+The architecture adopts a symmetric encoder-decoder structure (see figure \cite{fig:unet}), resulting in its distinct U-shape. The \textbf{encoder} (contracting path) captures contextual information through successive applications of convolutional and max-pooling layers, which gradually diminish spatial resolution while increasing feature depth. The \textbf{decoder} (expanding path) restores spatial resolution using upsampling and convolutional layers.
+
+A significant advancement of UNet is its implementation of skip connections; feature maps from the encoder are concatenated with their corresponding decoder layers. This direct transfer of high-resolution features enables accurate localization while preserving strong semantic comprehension. Moreover, UNet operates as a fully convolutional network, allowing it to process images of any size.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{imgs/unet.png}
+  \caption{The original UNet architecture. Reproduce from \cite{DBLP:journals/corr/RonnebergerFB15}}
+  \label{fig:unet}
+\end{figure}
+\noindent\textbf{UNet++}\\
+
+\noindent UNet++ \cite{DBLP:journals/corr/abs-1807-10165} extends the original UNet architecture with enhancements aimed at improving segmentation accuracy by addressing the semantic gap between encoder and decoder feature maps. It introduces \textbf{nested and dense skip pathways}, which facilitate better information flow and gradually reconcile semantic differences prior to fusion.
+
+Rather than directly connecting encoder and decoder feature maps as seen in UNet, UNet++ incorporates intermediate convolutional layers along the skip connections. These additional layers enable incremental refinement of feature maps that aligns them more semantically. The underlying hypothesis suggests that minimizing the semantic gap simplifies optimization processes and ultimately results in enhanced segmentation performance.
 \section{Distance maps}
+In image analysis, a \emph{distance map} (or distance transform) is a geometric representation in which each pixel of a binary object mask is assigned a value equal to its distance from the nearest boundary pixel. 
+Formally, given a binary mask $\mathbf{B}\in\{0,1\}^{H\times W}$ where foreground pixels indicate object regions, the distance transform $\mathcal{D}$ is defined as:
+\[
+\mathcal{D}(i,j) = \min_{(u,v)\in \partial \mathbf{B}} d\big((i,j),(u,v)\big),
+\]
+where $\partial \mathbf{B}$ denotes the boundary set of the object and $d(\cdot,\cdot)$ is a chosen metric (e.g., Euclidean, Manhattan, or chessboard). 
+This formulation produces a smooth map where pixel values increase towards the object centroid, encoding both shape and spatial structure.
+
+\subsection{Motivation in nuclear segmentation}
+In the field of histopathology, nuclear segmentations are extremely difficult when they are heavily crowded, mostly overlaps with each other or faintly stained.
+Conventional pixel-wise classification would merge adjacent nuclei into the same connected component, causing under-segmentation.
+Distance maps are a complementary geometric signal that describe the local relationship of each pixel with respect to its nucleus, and thus enable separation of closeby examples.
+
+Motivated by newer architectures like HoVer-Net \cite{graham2019hovernet} which regress horizontal and vertical distance maps with respect to the nuclear centroid, we also choose such a similar pipeline in our multi-head U-Net architecture.
+More precisely, for each pixel $p=(i,j)$ in a nucleus $n$, the signed distances along with x- and y-axis:
+\[
+\mathbf{Y}^d_{p} = \big(d_x(p,c_n),\, d_y(p,c_n)\big),
+\]
+where $c_n$ $(x_{n}, y_{n})$ is the centroid of the n-th nucleus and d (dx, dy) is a vector representing the displacement.
+These values are normalized into [-1, 1] to facilitate stable learning across nuclei of different sizes.
+\subsection{Theoretical justification}
+The use of distance maps can be interpreted as embedding each pixel into a low-dimensional geometric space, where relative distances encode structural priors.  
+In practice, regressing HV maps enables the network to learn gradients that point towards nuclei centers, which can be later combined with watershed-based post-processing to achieve instance-level separation \cite{vu2019methods}.
+
+\subsection{Advantages}
+The integration of distance maps offers several advantages:
+\begin{enumerate}
+    \item \textbf{Improved separation of touching nuclei:} distance gradients provide geometric cues that prevent merging errors.
+    \item \textbf{Shape regularization:} smooth distance distributions enforce spatial consistency and reduce noisy predictions.
+    \item \textbf{Better counting accuracy:} instance-aware representations lead to more reliable estimates of nuclei number, critical for quantitative pathology.
+\end{enumerate}
+
+Overall, distance maps serve as an essential intermediate representation that bridges the gap between semantic segmentation and instance-level delineation, strengthening both the robustness and interpretability of the model.
 \section{Watershed algorithm}
+The \emph{watershed} is a standard algorithm for image segmentation, where each level of gray is considered as a height in the corresponding topographic surface.
+We think of pixel values as elevations; light pixels represent peaks and dark pixels valleys.
+Simulating a flooding where the water fills the catchment basins progressively from local minima, the watershed transform attributes each pixel to its nearest catching basin separated by a watershed line.
+This is described by an image-partition into regions which correspond to the deep topological structure of the intensity landscape.
+
+\subsection{Mathematical formulation}
+Let $I:\Omega \to \mathbb{R}$ be a grayscale image, defined over a domain $\Omega \subset \mathbb{Z}^2$, the transformation identifies a segmentation $\{R_1,..., R_m\},$ which satisfies the following:
+\begin{equation}
+    \Omega = \bigcup_{k=1}^m R_k, \quad R_i \cap R_j = \emptyset \ \ \forall i\neq j,
+\end{equation}
+
+where every $R_k$ is a catchment basin of the local minimum of $I$.
+Watershed lines are those along which flow, from distinct minima, separates.
+
+Efficient algorithms have been developed for computing the watershed transform in linear time, based on discrete immersion and computational geometry of hypergraphs \cite{beucher1992watershed}.
+
+\subsection{Motivation in biomedical imaging}
+Watershed transform has been shown to be very effective especially in biomedical images where the objects of interest (cells, nuclei vessels) are usually packed together or overlapped.
+Since the algorithm focuses on the topological information it is able to correctly distinguish closely spaced objects with weak intensity boundaries.
+
+Naive watershed on the raw intensity images, however, usually suffers from \emph{over-segmentation}, because any small change or noise could be a spurious local minima.
+To address this, marker-controlled methods, where the flooding process is guided by a set of foreground and background markers, have been proposed \cite{beucher1992watershed}.
+Such construction is advantageous in terms of its robustness as regions are expanded only from valid seeds, and was even used as markers based watershed for the instance segmentation.
+
+\subsection{Integration with distance maps}
+In nuclei segmentation watershed is used not on the raw image, but the distance transforms or gradient likelihoods.
+For instance, the raw output of a regression head that predicts horizontal/vertical distance maps is converted into boundary likelihoods, which are used as markers for the watershed transform.
+This strategy combines advantages of deep-learning, such as semantic nucleus recognition and topology based separation, and thus realizes reliable instance segmentation even in clustered areas.
+
+\subsection{Advantages and limitations}
+The watershed algorithm has several practical virtues:
+\begin{itemize}
+\item \textbf{Boundary separation:} performs well on distinguishing overlapping or contacting objects also important for nuclei analysis.
+\item \textbf{Topology Preservation:} boundaries follow the natural intensity or gradient contours.
+\item \textbf{Compatibility:} straightforward to be applied as a post-processing on probability or distance maps generated by neural networks.
+\end{itemize}
+However, is susceptible to noise and intensity variance, which results over-segmentation.
+So the marker-based techniques and pre-processing (smoothing, distance map normalization etc.,) are necessary for stable performance.
 \chapter{Dataset}
 \label{sec:dataset}
 The analysis of nuclear features in histopathology images has long been recognized as a crucial aspect of cancer research and diagnosis. The part that seems like a bottleneck is the limited size of the most publicy available dataset for nuclei segmentation and classification, and often suffering from sparse labelling or sampling bias.\\
@@ -198,20 +306,21 @@ Nuclei Attribute &     0 &     0 &     0 &     0 &   0 & 500 &     500 \\
 \hline
 \textbf{Total}   &20,414 & 8,380 & 9,840 & 5,374 & 2,547 & 500 & 47,055 \\
 \hline\hline
+\label{tab:categories}
 \end{tabular}%
 }
 \end{table}
 \section{Method}
-The authors followed three pathways to abtaind the validated dataset. These three pathways are segmentation, detection and classification. Using the CNN trained on patches extracted from the datasets in Table 1, they classified all the labeled nuclei part of the above datasets mentioned, which were then verified by a team of pathologists and classified by the PanNuke categories.\\
+The authors followed three pathways to abtaind the validated dataset. These three pathways are segmentation, detection and classification. Using the CNN trained on patches extracted from the datasets in Table \ref{tab:categories}, they classified all the labeled nuclei part of the above datasets mentioned, which were then verified by a team of pathologists and classified by the PanNuke categories.\\
 After, they took 2,000 patches from more than 20,000 WSI in 19 tissues obtained from a TCGA.
 The models predictions were evaluated in terms of uncertainty, like a clear misclassification. The expert pathologists re-annotated these difficult cases, and the corrected annotations were used to retrain the models. 
 \begin{figure}[h] % l'opzione [h] cerca di posizionare l'immagine "here"
     \centering
     \includegraphics[width=0.45\textwidth]{imgs/pannuke_annotations.png}
     \caption{Illustration of PanNuke for label and verificationthe. Reproduce from \cite{gamper2020pannuke}}
-    \label{fig:esempio}
+    \label{fig:process-ver}
 \end{figure}
-Then proceed to Part A of annotation process Figure 1.1. After a total of 7 iterations of the process, pathologists would evaluate and re-label the detected and classified nuclei.\\
+Then proceed to Part A of annotation process Figure \ref{fig:process-ver}. After a total of 7 iterations of the process, pathologists would evaluate and re-label the detected and classified nuclei.\\
 To generate the segmentation masks they use NuClick \cite{jahanifar2019nuclick}, that brings an accurate segmentation mask from a single point. 
 \section{Class Distribution}
 \label{sec:classdistribution}
@@ -222,26 +331,27 @@ In evarage, most nuclei types that have been provided belongs in all tissues con
     \centering
     \includegraphics[width=\linewidth]{imgs/class_distributionù.png}
     \caption{Class distribution. Reproduce from \cite{gamper2020pannuke}}
+    \label{fig:class_distri}
   \end{minipage}\hspace{2cm}
   \begin{minipage}{0.3\textwidth}
     \centering
     \includegraphics[width=\linewidth]{imgs/class_tab.png}
     \caption{Nuclei categories. Reproduce from \cite{gamper2020pannuke}}
+    \label{fig:class_tab}
   \end{minipage}
 \end{figure}
-PanNuke defines nuclei into five categories, tab 1.3: \textbf{Neoplastic} includes any type of tumor, malignant or benign, therefore includes carcinomas, sarcomas, melanomas, lymphomas, etc. Those tumors are originate from different cell types: carcnimoas from epithelial; sarcomas from lymphoid cells etc.\\
+PanNuke defines nuclei into five categories, figure \ref{fig:class_tab} \textbf{Neoplastic} includes any type of tumor, malignant or benign, therefore includes carcinomas, sarcomas, melanomas, lymphomas, etc. Those tumors are originate from different cell types: carcnimoas from epithelial; sarcomas from lymphoid cells etc.\\
 \textbf{Non-neoplastic} covers everything else, thus different categories from normal to inflammatory, metaplastic, degenerative, etc.\\
 \textbf{Connective} cells have the potential to become tumors.\\
 \textbf{Inflammatory} cells include macrophage and lymphoid, unlike connective cells, inflammatory cells cannot become plastic.\\
 \textbf{Dead cells} can arise from neoplastic or non-neoplastic.\\
 
-In figure 1.2 we can observe that the distribution of the total nuclei count per tissue and per class changes between tissue types. We observe that there is a strong imbalance reflects the biological prevalence of cell types in histopathology slides that will become a challenge for deep learning models. In particular, the nucleis categoriesed dead are rare, therefore will be difficult to segment and classify.\\
+In figure \ref{fig:class_distri} we can observe that the distribution of the total nuclei count per tissue and per class changes between tissue types. We observe that there is a strong imbalance reflects the biological prevalence of cell types in histopathology slides that will become a challenge for deep learning models. In particular, the nucleis categoriesed dead are rare, therefore will be difficult to segment and classify.\\
 Overall, the class distribution prove that PanNuke offers both large quantities of common cell types and valuable examples of underrepresented nuclei, reaching a realistic dataset that mirrors the cases that could present in clinical practice.
 
 \section{Dataset Statistics}
 The PanNuke dataset provides nuclei annotations across 19 tissue types, with each nucleus labeled according to one of five clinically relevant categories. The dataset contains 189,744 nulei annotated at the instance level.\\
 For the purpose of this work, only neoplastic nuclei where considered. This choice was motivated by the specific objective of our study, which focused on identifying and counting malignant cells. In practice, the ground truth masks were converted in bianry masks, where each positive pixel belong to a neoplastic nucleo and the remaining pixels were just merged with the background.\\
-
 By restricting the dataset to neoplstic nuclei, the resulting distribution is imbalanced compared to the full PanNuke schema.
 
 \chapter{Methodology}
@@ -257,7 +367,7 @@ The heart of the system is a U-Net \cite{DBLP:journals/corr/RonnebergerFB15} net
 \noindent\textbf{Hardware environment}\
 
 \noindent The complete pipeline was run on a workstation having the following hardware components: \begin{itemize} 
-    \item \textbf{CPU}: AMD Ryzen 5 9600X, 6C/12T 
+    \item \textbf{CPU}: AMD Ryzen 5 9600X, 6 Core/12 Thread 
     \item \textbf{GPU}: NVIDIA RTX 3080 Ti 11 GB
     \item \textbf{RAM}: 32 GB DDR5, 6000 MHz 
     \item \textbf{OS}: Linux (Ubuntu) 64 bit 
@@ -265,7 +375,7 @@ The heart of the system is a U-Net \cite{DBLP:journals/corr/RonnebergerFB15} net
 \end{itemize} 
 This setting was computationally feasible for our model training.
 
-\subsection{Pipeline} The pipeline was constructed to guarantee that the entire workflow, from data pre-processing up to the automated model evaluation, was reproducible: from the preparation of the data to the automatic evaluation of the models. The entire set of procedure is coordinated by the main script \texttt{main.py}. The overall framework for automatic nuclear instance segmentation can be observed in Fig. 1 and the proposed network in Fig. 2
+\subsection{Pipeline} The pipeline was constructed to guarantee that the entire workflow, from data pre-processing up to the automated model evaluation, was reproducible: from the preparation of the data to the automatic evaluation of the models. The entire set of procedure is coordinated by the main script \texttt{main.py}. The overall framework for automatic nuclear instance segmentation can be observed in figure \ref{fig:postproc_overview} and the proposed network in figure \ref{fig:Unet}
 
 \section{Problem statement} The aim of this study is to develop and investigate a segmentation framework specifically designed for the detection and counting of \textbf{neoplastic nuclei} from histopathology images. PanNuke annotates some other forms of nuclei in addition to other surrounding entities (multi-class) whereas ours is exclusive to cancerous nuclei (multi-nominal) translating the original multi-class problem to a binary segmentation problem.
 
@@ -286,17 +396,52 @@ The raw PanNuke dataset is organized into three folder inside each folder there 
     \item \textbf{mask.npy}: contains $N$ images, each with a size of $256 \times 256$ pixels and 6 channels.  
     The first five channels correspond to the instance maps of the nuclear categories described in Section~\ref{sec:classdistribution}.  
     Specifically, the first channel encodes the instance map of neoplastic nuclei in the $n$-th image, the second channel the instance map of non-neoplastic epithelial nuclei, and so on.  
-    The sixth channel is a binary mask that includes all nuclei, regardless of category, in the $n$-th image.
+    The sixth channel is a binary mask that includes all nuclei, regardless of category, in the $n$-th image. An example of the six channels for one image is shown in figure \ref{fig:2x3grid}.
     
     \item \textbf{image.npy}: contains $N$ images, each with a size of $256 \times 256$ pixels and 3 channels, representing the original RGB images.
 \end{enumerate}
-\begin{center}
-    \begin{tikzpicture}
-        \node (img1) {\includegraphics[height=3cm]{imgs/class_distributionù.png}};
+\begin{figure}[ht]
+\centering
+% Riga 1
+\begin{subfigure}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/dataset/neop.png}
+  \caption{}
+\end{subfigure}\hfill
+\begin{subfigure}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/dataset/notneop.png}
+  \caption{}
+\end{subfigure}\hfill
+\begin{subfigure}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/dataset/connect.png}
+  \caption{}
+\end{subfigure}
 
-        \node (img2) at (img1.south east){\includegraphics[height=3cm]{imgs/class_distributionù.png}};
-    \end{tikzpicture}
-\end{center}
+\vspace{0.4em}
+
+% Riga 2
+\begin{subfigure}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/dataset/inflam.png}
+  \caption{}
+\end{subfigure}\hfill
+\begin{subfigure}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/dataset/dead.png}
+  \caption{}
+\end{subfigure}\hfill
+\begin{subfigure}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{imgs/dataset/binary_mask.png}
+  \caption{}
+\end{subfigure}
+
+\caption{Visualization of the six channels contained in \texttt{mask.npy} for a representative image patch.  
+From top-left to bottom-right: (a) neoplastic nuclei, (b) non-neoplastic epithelial nuclei, (c) connective nuclei, (d) inflammatory nuclei, (e) dead nuclei, and (f) the binary mask aggregating all categories.}
+\label{fig:2x3grid}
+\end{figure}
 \subsection{Image Preprocessing}
 The image preprocessing was developed to evaluate the impact of different input on the main task. 
 The raw dataset provides RGB images described in Section~\ref{sec:datafiles}. 
@@ -374,9 +519,9 @@ This three-channel encoding brings to distinguish nuclear region from background
     \label{fig:esempio}
 \end{figure}
 \noindent\textbf{Distance maps}\\
-Beside the binary masks, the pre-processing pipeline also produce distance maps (265765) that give pixel-wise geometric information on nuclear shape. For H\&E images, every distance map consists of two channels representing the horizontal (H) and vertical (V) distance of the pixels to the centroid of their nuclei. This representation, spurred by HoVer-Net \cite{graham2019hovernet}, enables the model to disentangle touching or overlapping nuclei by learning their spatial configuration.
+Beside the binary masks, the pre-processing pipeline also produce distance maps that give pixel-wise geometric information on nuclear shape. For each images, every distance map consists of two channels representing the horizontal (H) and vertical (V) distance of the pixels to the centroid of their nuclei. This representation, spurred by HoVer-Net \cite{graham2019hovernet}, enables the model to disentangle touching or overlapping nuclei by learning their spatial configuration.
 
-Generation process will begin from the neoplastic nuclei instance maps obtained from \texttt{mask.npy}. The result is a standarised instance map, in which each nucleus has been labelled by an unique index. The class \texttt{GenInstanceHV}, next, computes the horizontal and vertical distances for all pixels within the nucleus, normalizing them between $-1$ and $1$. The pipeline also involves post-processing to account for duplicated labels due to data augmentation, and filtering very small objects.
+Generation process will begin from the neoplastic nuclei instance maps obtained from \texttt{mask.npy}. The result is a standarised instance map, in which each nucleus has been labelled by an unique index. The class \texttt{GenInstanceHV}, next, computes the horizontal and vertical distances for all pixels within the nucleus, normalizing them between $-1$ and $1$.
 
 The resulting ground truth is a 2-array: binary mask containing neoplastic nuclei, and a pair of distance maps H and V. These will be used later as supervision targets for a segmentation head and a regression head of the U-Net: the segmentation head outputs imposingly binary masks, the regression head predicts dense HV maps.
 
