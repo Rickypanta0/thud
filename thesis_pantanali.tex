@@ -53,12 +53,12 @@
 
 %% Dedica (opzionale)
 \begin{dedication}
-	Al mio cane,\par per avermi ascoltato mentre ripassavo le lezioni.
+	Niente nella vita va temuto, dev’essere solo compreso.
 \end{dedication}
 
 %% Ringraziamenti (opzionali)
 \acknowledgements
-Sed vel lorem a arcu faucibus aliquet eu semper tortor. Aliquam dolor lacus, semper vitae ligula sed, blandit iaculis leo. Nam pharetra lobortis leo nec auctor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Fusce ac risus pulvinar, congue eros non, interdum metus. Mauris tincidunt neque et aliquam imperdiet. Aenean ac tellus id nibh pellentesque pulvinar ut eu lacus. Proin tempor facilisis tortor, et hendrerit purus commodo laoreet. Quisque sed augue id ligula consectetur adipiscing. Vestibulum libero metus, lacinia ac vestibulum eu, varius non arcu. Nam et gravida velit.
+I would like to thank my family, who supported me every day, in every situation, through good times and bad. A special thanks goes to my mom, my greatest supporter, who helped me throughout these three years. I am also grateful to all my friends for the laughs and the happy moments we shared. My deepest thanks go to Filippo, Lorenzo, Matteo, Mattia, and Ludovico, who spent these three years with me between lectures and exams, card games and group projects, jokes and explanations. Finally, a personal thank you goes to myself: the first to believe in this journey and to carry it forward with determination.
 
 %% Sommario (opzionale)
 %\abstract
@@ -107,7 +107,7 @@ The rest of this thesis is structured as follows:
 \item \textbf{Chapter 3 (Dataset)} Presents the PanNuke dataset, followed by its creation process, class distribution, and the statistics related to our study.
 \item \textbf{Chapter 4 (Methodology)} Defines the whole pipeline by preprocessing, proposed multi-head U-Net architecture, losses, training strategy, and post-processing steps.
 \item \textbf{Chapter 5 (Results)} Presents the experimental results including the comparison of different preprocessing options as well as an investigation of the segmentation and counting quality.
-\item \textbf{Chapter 6} (\textbf{Conclusion}) Summarizes key findings, discusses limitations and suggests potential future research directions.
+\item \textbf{Chapter 6} (\textbf{Discussion and Conclusion}) Summarizes key findings, discusses limitations and suggests potential future research directions.
 \end{itemize}
 \chapter{Theoretical aspects}
 \label{sec:theory}
@@ -140,7 +140,7 @@ For instance, extracting the Hematoxylin channel has been shown to reduce false 
 \section{Computer vision}
 Computeer vision is a field of study that enables computers to interpret and make decisions based on visual data as images or videos. It encompasses a wide range of tasks, including object detection, image classification. segmentation, and traking. The ultimate goal of computer vision is to replicate and eventually surpass human visual understanding. \\
 Traditionally. computer vision system relied on hand-crafted features and classical algorithms to extract and process visual information. While these techniques achieved some success, they required significant domain expertise and manual effort and often struggled with generalization to real-world data \cite{lecun2015deep}.\\
-The emergence of deep learning, particuarly Convolutional Neural Networks (CNNs) \cite{lecun1998gradient}, marked a significant shift in the field. Instead of relying on engineered features, CNNs learn hierarchical feature representations directly from raw image data, anabling end-to-end training for complex visual tasks \cite{krizhevsky2012imagenet}.
+The emergence of deep learning, particularly Convolutional Neural Networks (CNNs) \cite{lecun1998gradient}, marked a significant shift in the field. Instead of relying on engineered features, CNNs learn hierarchical feature representations directly from raw image data, anabling end-to-end training for complex visual tasks \cite{krizhevsky2012imagenet}.
 \section{Instance segmentation}
 Figure \ref{fig:semantic} illustrates the difference between several common computer vision tasks. Image recognition (top left) predicts the presence of classes in an image as a whole. Object detection (bottom left) goes further by locating individual objects with bounding boxes. Semantic segmentation (top right), instead, assigns a class label to each pixel, without distinguishing among different instances of the same category. 
 
@@ -148,7 +148,7 @@ Instance segmentation (bottom right) extends this concept by not only labeling e
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.75\linewidth]{imgs/Instance segmentation.png}
+    \includegraphics[width=0.75\linewidth]{imgs/Instance segmentation.jpg}
     \caption{Sample annotated image from the COCO \cite{lin2015microsoftcococommonobjects} dataset with a comparison of common computer vision tasks.}
     \label{fig:semantic}
 \end{figure}
@@ -194,7 +194,7 @@ The architecture adopts a symmetric encoder-decoder structure (see figure \cite{
 A significant advancement of UNet is its implementation of skip connections; feature maps from the encoder are concatenated with their corresponding decoder layers. This direct transfer of high-resolution features enables accurate localization while preserving strong semantic comprehension. Moreover, UNet operates as a fully convolutional network, allowing it to process images of any size.
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\textwidth]{imgs/unet.png}
+  \includegraphics[width=0.8\textwidth]{imgs/unet.jpg}
   \caption{The original UNet architecture. Reproduce from \cite{DBLP:journals/corr/RonnebergerFB15}}
   \label{fig:unet}
 \end{figure}
@@ -316,7 +316,7 @@ After, they took 2,000 patches from more than 20,000 WSI in 19 tissues obtained 
 The models predictions were evaluated in terms of uncertainty, like a clear misclassification. The expert pathologists re-annotated these difficult cases, and the corrected annotations were used to retrain the models. 
 \begin{figure}[h] % l'opzione [h] cerca di posizionare l'immagine "here"
     \centering
-    \includegraphics[width=0.45\textwidth]{imgs/pannuke_annotations.png}
+    \includegraphics[width=0.45\textwidth]{imgs/pannuke_annotations.jpg}
     \caption{Illustration of PanNuke for label and verificationthe. Reproduce from \cite{gamper2020pannuke}}
     \label{fig:process-ver}
 \end{figure}
@@ -377,7 +377,7 @@ This setting was computationally feasible for our model training.
 
 \subsection{Pipeline} The pipeline was constructed to guarantee that the entire workflow, from data pre-processing up to the automated model evaluation, was reproducible: from the preparation of the data to the automatic evaluation of the models. The entire set of procedure is coordinated by the main script \texttt{main.py}. The overall framework for automatic nuclear instance segmentation can be observed in figure \ref{fig:postproc_overview} and the proposed network in figure \ref{fig:Unet}
 
-\section{Problem statement} The aim of this study is to develop and investigate a segmentation framework specifically designed for the detection and counting of \textbf{neoplastic nuclei} from histopathology images.
+\section{Problem statement} The aim of this study is to develop and investigate a segmentation framework specifically designed for the detection and counting of \textbf{neoplastic nuclei} from histopathology images. PanNuke annotates some other forms of nuclei in addition to other surrounding entities (multi-class) whereas ours is exclusive to cancerous nuclei (multi-nominal) translating the original multi-class problem to a binary segmentation problem.
 
 Another objective is to study the differences in performances and counting precision when different image representations (i.e., RGB, hematoxylin-extracted H\&E channels, blue colormaps, grayscale) are used. In this frame, the main points of research can be listed as: \begin{itemize} \item Binary masks and distance maps learned from PanNuke instance annotations serve as trustworthy supervisory signals for both segmentation and nuclei separation? \item What is the effect of the input modality on the model's capability to segment and count mitotic nuclei? \end{itemize}
 
@@ -461,13 +461,13 @@ By preprocessing the dataset into these four modalities, the experimental pipeli
     % Riga 1
     \begin{subfigure}{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{imgs/RGB.png}
+        \includegraphics[width=\linewidth]{imgs/RGB.jpg}
         \caption{RGB}
     \end{subfigure}
     \hspace{0.2cm}
     \begin{subfigure}{0.45\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{imgs/HE.png}
+        \includegraphics[width=\linewidth]{imgs/HE.jpg}
         \caption{Hematoxylin}
     \end{subfigure}
     
@@ -491,7 +491,7 @@ By preprocessing the dataset into these four modalities, the experimental pipeli
 \end{figure}
 
 \subsection{Mask Generation}
-In the PanNuke datasets there are different files described in Section~\ref{sec:datafiles}, for this work will be use only a part of them.\\
+In the PanNuke datasets there are different files described in Section~\ref{sec:datafiles}, for this work will be use only a part of them. The task is to study the segmentation and counting of neoplastic cells. Therefore, the generation of binary masks and distance maps pivot on that goal.\\
 
 \noindent\textbf{Binary masks}\\
 \label{sec:maskgeneration}
@@ -523,14 +523,14 @@ Beside the binary masks, the pre-processing pipeline also produce distance maps 
 
 Generation process will begin from the neoplastic nuclei instance maps obtained from \texttt{mask.npy}. The result is a standarised instance map, in which each nucleus has been labelled by an unique index. The class \texttt{GenInstanceHV}, next, computes the horizontal and vertical distances for all pixels within the nucleus, normalizing them between $-1$ and $1$.
 
-The resulting ground truth is a 2-array: binary mask containing neoplastic nuclei, and a pair of distance maps H and V. These will be used later as supervision targets for a segmentation head and a regression head of the U-Net: the segmentation head outputs imposingly binary masks, the regression head predicts HV maps.
+The resulting ground truth is a 2-array: binary mask containing neoplastic nuclei, and a pair of distance maps H and V. These will be used later as supervision targets for a segmentation head and a regression head of the U-Net: the segmentation head outputs imposingly binary masks, the regression head predicts dense HV maps.
 
 This formulation helps the model to learn the categorical and structural information jointly, which further enhances the stability of nuclei segmentation and counting.
 \begin{figure}[htbp] % o [H] con \usepackage{float}
 \centering
 \begin{tikzpicture}[node distance=8cm, >=stealth]
   % immagini
-  \node (img1) {\includegraphics[width=0.30\textwidth]{imgs/instance.png}};
+  \node (img1) {\includegraphics[width=0.30\textwidth]{imgs/instance.jpg}};
   \node (img2) [right of=img1, xshift=1cm]
         {\includegraphics[width=0.40\textwidth]{imgs/Distancemaps.png}};
 
@@ -542,66 +542,65 @@ This formulation helps the model to learn the categorical and structural informa
 \label{fig:esempio}
 \end{figure}
 \subsection{Data Augmentation}
-The dataset was artificially expanded using a combination of simple geometric transformations resulting in an increased number of training examples and reducing the risk of overfitting.
-All augmentation was applied on-the-fly, within the custom \texttt{DataGenerator} class extending from \texttt{keras. utils. Sequence} and repeatedly loads and transforms data on the fly.
+To increase variability and reduce the risk of overfitting, the dataset was augmented during training using simple but effective geometric transformations. 
+All augmentation was implemented directly in the custom \texttt{DataGenerator} class, which inherits from \texttt{keras.utils.Sequence} and dynamically loads and transforms data on the fly. 
 
 The applied transformations were:
 \begin{itemize}
-\item \textbf{Horizontal and vertical flips}: each image-mask pair is flipped along the horizontal or vertical axis with probability of 0.5.
-\item \textbf{Random rotations:} patches were rotated by 90 degrees, being the orientation consistent among image, binary mask and distance maps.
+    \item \textbf{Horizontal and vertical flipping}: images and their corresponding masks were randomly flipped along the horizontal or vertical axis with probability 0.5.
+    \item \textbf{Random rotations}: patches were rotated by multiples of 90 degrees, ensuring consistent orientation between the image, binary mask, and distance maps.
 \end{itemize}
 
-The transformations do not distort the semantic content of nuclei while adding diversity to the training set.
-The effective training size increases because we stochastically apply batches per epoch and now that number is multiplied by the total dataset size, so it helps the model to generalize better.
-Note that we augmented both the segmentation masks and distance maps in the same way as their corresponding images to preserve spatial position.
+These transformations preserve the semantic structure of nuclei while increasing diversity in the training set. 
+By applying them stochastically at each epoch, the effective dataset size is multiplied, leading to improved generalization of the model. 
+It is important to note that both the segmentation masks and the distance maps were augmented consistently with the corresponding images to maintain spatial alignment. 
 
-As well as seismic transformation, the \texttt{DataGenerator} has support methods for different representation of inputs (RGB, hematoxylin channel extraction, blue colormap application and grayscale), thus allowing a systematic evaluation of models on visual representations. All the transformations were applied on \textbf{train} set, without any change in both \textbf{val} and \textbf{test}. \\
+In addition to geometric transformations, the \texttt{DataGenerator} also supports different input representations (RGB, hematoxylin channel, blue colormap, and grayscale), enabling a systematic comparison of model performance across varying image modalities. All transformations were applied only to the \textbf{train} subset, while \textbf{val} and \textbf{test} remained in their original form.\\
 
-Right before every augmentation run there is a line where a global seed gets set which ensures that NumPy’s and OpenCV’s (cv2) random number generators are in sync. This way, the exact same set of images can always be reproduced and outliers can consistently be recognized.
+Before each augmentation session, the script sets a global seed that synchronizes the random number generators of \textbf{NumPy} and \textbf{cv2} (OpenCV). This ensures that the same batch of images can always be reproduced and anomalies can be consistently identified.
 \section{Model Architecture}
 \label{sec:model}
-The architecture of the proposed network is inspired by the U-Net \cite{DBLP:journals/corr/RonnebergerFB15}, which is a popular encoder-decoder design for biomedical image segmentation.
-U-Net is comprised of a contracting path to capture context by convolutions and downsampling and an expansive path to integrate this context with high resolution details through skip connections.
-This framework allows for accurate separation of cellular structures even from a small number of training samples.
+The proposed network is inspired by the U-Net architecture \cite{DBLP:journals/corr/RonnebergerFB15}, a widely used encoder–decoder structure for biomedical image segmentation. 
+U-Net consists of a contracting path, which progressively captures semantic context through convolutional and downsampling operations, and an expansive path, which combines this context with high-resolution spatial information via skip connections. 
+This design enables precise delineation of cellular structures even when only limited training data is available.
 
-In our model, the encoder is made of chained convolutional blocks with batch normalization, ReLU activation and dropout for regularization.
-At each downsampling step, the number of filters is increased by a factor 2 (32, 64, 128, 256, 512), and spatial resolution is halved with max pooling layers.
-The final bottleneck layer, with 512 filters captures high-level semantic information, followed by the decoder.
+In our implementation, the encoder is composed of successive convolutional blocks with batch normalization, ReLU activation, and dropout for regularization. 
+The number of filters doubles at each downsampling step (32, 64, 128, 256, 512), while max pooling layers reduce the spatial resolution by a factor of two. 
+The bottleneck layer captures high-level semantic features with 512 filters before entering the decoder.
 
-And the decoder symmetrical to encoder is composed similarly of upsampling layers, concatenating with paired encoder features and convolutional refinements.
-This symmetric design guarantees that contextual features captured at low resolutions can be well integrated with fine-scale spatial details.
+The decoder mirrors the encoder with upsampling layers, concatenations with the corresponding encoder features, and convolutional refinements. 
+This symmetric structure ensures that contextual information extracted at low resolutions is effectively fused with fine-grained spatial details.
 
-\noindent\textbf{Multi-head design.}
-In order to provide a more tailored solution to nuclei segmentation and separation, we extend our model with two task-specific output heads, strongly motivated by the HoVer-Net \cite{graham2019hovernet} framework:
+\noindent\textbf{Multi-head design.}  
+To better address the task of nuclei segmentation and separation, the model has been extended with two task-specific output heads, inspired by the HoVer-Net approach \cite{graham2019hovernet}:  
 \begin{itemize}
-\item \textbf{Segmentation head (seg\_head)}: a 1$\times$1 convolution followed by a softmax activation produces a 3-channel probability map of classes \textit{body}, \textit{background}, and \textit{border}. The shape representation consists of nuclear regions and their contours, which explicitly encoded to allow the removal of touching nuclei.
-\item \textbf{Distance head (hv\_head)} : outputs the horizontal and distance of each pixel to the nucleus centroid as HV-channels after a parallel 1$\times$1 convolution followed by a linear activation. These distance maps provide significant geometric cues to more effectively separate fused nuclei.
+    \item \textbf{Segmentation head (seg\_head)}: a 1$\times$1 convolution followed by a softmax activation outputs a 3-channel probability map corresponding to \textit{body}, \textit{background}, and \textit{border}. This representation explicitly encodes both nuclear regions and contours, which facilitates the separation of touching nuclei.  
+    \item \textbf{Distance head (hv\_head)}: a parallel 1$\times$1 convolution followed by a linear activation outputs two channels encoding the horizontal (H) and vertical (V) distances of each pixel to the nucleus centroid. These distance maps provide strong geometric cues to further separate overlapping nuclei.  
 \end{itemize}
 
-\noindent\textbf{Advantages.}
-By integrating semantic segmentation (seg\_head) with geometric regression (hv\_head), the network is able to learn information of category and structure at once.
-This multi-task framework enhances generalization in crowded areas, and increases nuclei detection rate with maintaining the efficiency of end-to-end trainable models.
+\noindent\textbf{Advantages.}  
+By combining semantic segmentation (seg\_head) with geometric regression (hv\_head), the network simultaneously learns categorical and structural information. 
+This multi-task formulation improves robustness in crowded regions and enhances nuclei counting, while preserving the efficiency of an end-to-end trainable model.
 \begin{figure}[H] % l'opzione [h] cerca di posizionare l'immagine "here"
     \centering
-    \includegraphics[width=1\textwidth]{imgs/model.png}
+    \includegraphics[width=1\textwidth]{imgs/model.jpg}
     \caption{Model architecture used}
     \label{fig:Unet}
 \end{figure}
 \section{Loss Function}
-\label{sec:loss}
 The model describred in Section~\ref{sec:model} is trained using a composite loss functino $\mathcal{L}^p+\mathcal{L}^d$ wich combines terms for pixel classificatino into $body$, $background$, $border$ ($\mathcal{L}^p$) and distance map regression in ($\mathcal{L}^d$).
 In the following, we refer at each pixel $i$ and to the heads'output tensor as $\widehat{\mathbf{Y}}^p=[\widehat{\mathbf{Y}}^p_{ik}]\in [0,1]^{H\times W\times P}$, $\widehat{\mathbf{Y}}^d=[\widehat{\mathbf{Y}}^d_{ik}]\in \mathbb{R}^{H\times W\times R}$, respectively, where $P = 3$, $R = 2$, are the number of pixels classes and the number of distance maps, $N$ and $W$ mathes the height and width of the images in input. The ground truths (GT) are represented as $\mathbf{Y}^p$ and $\mathbf{Y}^d$.
 
-A fundamental aspect when training a neural network models lies in the choice of an appropriate loss function. The loss function directly defines the model's optimization objective and this significantly influences performance.
+A fundamental aspect to keep in mind when training a neural network models lies in the coice of an appropriate loss function. The loss function directly defines the model's optimization objective and this significantly influences ints performance and ability to handle common challenges such as class imbalance and structural detail preservation.
 
-As described before the U-net proposed has 2 dirrent sets of weights: $w_0, w_1$ which refer respectively to the weights $\mathcal{L}^p$ (hv\_head) and $\mathcal{L}^d$ (seg\_head), for this work we used $w_0=2$ and $w_1=1$. These 2 sets of weights are optimised jointly using the loss $\mathcal{L}$ defined as:
+As described before the U-net proposed has 2 dirrent sets of weights: $w_0, w_1$ which refer to the weights $\mathcal{L}^p$ (hv\_head) and $\mathcal{L}^d$ (seg\_head). These 2 sets of weights are optimised jointly using the loss $\mathcal{L}$ defined as:
 
 \begin{equation}
 \mathcal{L} =
 \underbrace{\lambda_a \mathcal{L}_a + \lambda_b \mathcal{L}_b}_{\text{hv\_head}} +
 \underbrace{\lambda_c \mathcal{L}_c + \lambda_d \mathcal{L}_d}_{\text{seg\_head}}
 \end{equation}
-where $\mathcal{L}_a$ and $\mathcal{L}_b$ represent the regression loss for the distance maps predicted, $\mathcal{L}_c$ and $\mathcal{L}_d$ represent the loss with respect ot the output at the seg\_head, therefore the binary masks. $\lambda_a\dots\lambda_d$ are scalars that gives weight to the the loss. More precisly, we set $\lambda_b$ to 3 and the others scalars set to 1. \\
+where $\mathcal{L}_a$ and $\mathcal{L}_b$ represent the regression loss for the distance maps predicted, $\mathcal{L}_c$ and $\mathcal{L}_d$ represent the loss with respect ot the output at the seg\_head, therefore the binary masks. $\lambda_a\dots\lambda_d$ are scalars that gives weight to the the loss. More precisly, we set $\lambda_b$ to 2 and the others scalars set to 1. \\
 
 In practice, each component of the total loss corresponds to a specific learning objective. 
 For the \textbf{hv\_head}, which predicts the horizontal and vertical distance maps, two terms are considered: 
@@ -651,7 +650,7 @@ decoupled weight decay (AdamW-style) with coefficient $\lambda_{\mathrm{wd}}=10^
 We adopt the standard $\beta_1{=}0.9$, $\beta_2{=}0.999$, and $\epsilon{=}10^{-8}$. In our experiments, the inclusion of a small decoupled weight decay yielded more stable training on this relatively small dataset.
 
 \subsection{Learning rate scheduler}
-The learning rate is one of the most critical hyperparameters to set when training a model, directly affecting convergence speed, trainign stability, and overall model performance.\\
+THe learning rate is one of the most critical hyperparameters to set when training a model, directly affecting convergence speed, trainign stability, and overall model performance.\\
 We employ \texttt{ReduceLROnPlateau} on the validation objective (monitoring \texttt{val\_loss}) with
 reduction factor $\gamma{=}0.5$, patience of 3 epochs, and floor $\eta_{\min}{=}10^{-4}$.
 Formally, letting $s_t$ be the best validation score up to epoch $t$ and $p$ the patience,
@@ -691,7 +690,7 @@ Epochs & $30$ (with early stop) \\
 \label{sec:postprocessing}
 
 The raw outputs of the multi-head U-Net model described in Sectio model, namely the probability maps from the \texttt{seg\_head} and the distance maps from the \texttt{hv\_head}, cannot be directly used for reliable nuclei counting. 
-According to the notation in section \ref{sec:loss}, this yield predictions $\widehat{\mathbf{Y}}^p$ and $\widehat{\mathbf{Y}}^d$ for the entire image, which are post-processed as illustrated in figure \ref{fig:postproc_overview} and described below. 
+According to the notation in Section loss, this yield predictions $\widehat{\mathbf{Y}}^p$ and $\widehat{\mathbf{Y}}^d$ for the entire image, which are post-processed as illustrated in Fig1 and described below. 
 This stage was partly inspired by the post-processing strategy proposed in HoVer-Net \cite{graham2019hovernet}, but adapted to the specific requirements of this work.
 
 \subsection{Distance-based separation}
@@ -739,7 +738,7 @@ The complete post-processing workflow can be summarized as follows:
 \end{enumerate}
 \begin{figure}[H] % l'opzione [h] cerca di posizionare l'immagine "here"
     \centering
-    \includegraphics[width=1\textwidth]{imgs/overall.png}
+    \includegraphics[width=1\textwidth]{imgs/overall.jpg}
     \caption{Model architecture used}
     \label{fig:postproc_overview}
 \end{figure}
@@ -801,8 +800,8 @@ We begin by outlining a set of preliminary experiments that assess the impact of
 Unless otherwise stated, post-processing thresholds were set as in Section~\ref{sec:postprocessing}, with the foreground threshold $\theta_1$ tuned on validation by IoU on ground-truth labels and $\theta_2$ as the minimum instance area.
 
 \section{Experimental setup}
-All experiments were conducted under identical training conditions, as detailed in Chapter~\ref{sec:methodology}. 
-Each model was trained for a maximum of 40 epochs with early stopping, using Adam optimizer with weight decay, ReduceLROnPlateau scheduler, and a batch size of 8. 
+All experiments were conducted under identical training conditions, as detailed in Chapter~\ref{chap:methodology}. 
+Each model was trained for a maximum of 30 epochs with early stopping, using Adam optimizer with weight decay, ReduceLROnPlateau scheduler, and a batch size of 8. 
 For each preprocessing modality (RGB, Hematoxylin, Blue, Gray), a separate model was trained and tested using the same split of training/validation data.
 
 Performance evaluation was carried out using both segmentation metrics (Dice, IoU, AJI, PQ) and counting metrics (MAE, Pearson correlation $\rho$, coefficient of determination $R^2$). 
@@ -810,8 +809,8 @@ Post-processing was applied to all model predictions before metric computation t
 
 \section{Segmentation performance}
 
-The final evaluation on the test set, as shown in tables~\ref{tab:iou-results} and ~\ref{tab:pix-binary}, the model with RGB images achieves the highest scores across all metrics.\\
-Among the remaining input modalities, the Hematoxylin input performs moderately well,  
+The final evaluation on the test set, as shown in tables~\ref{tab:iou-results} and ~\ref{tab:pix-binary}, the model with Hematoxylin images achieves the highest scores across all metrics.\\
+Among the remaining input modalities, the RGB input performs moderately well,  
 Table~\ref{tab:iou-results}  summarizes the instance-level performance using DICE2, AJI, PQ, SQ and DQ (Section~\ref{sec:metrics}). 
 PQ is further factorized into detection quality (DQ) and segmentation quality (SQ), providing a more interpretable view on missed detections vs. mask quality.
 
@@ -822,12 +821,12 @@ PQ is further factorized into detection quality (DQ) and segmentation quality (S
 \small
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Input} & \textbf{DICE2} $\uparrow$ & \textbf{AJI} $\uparrow$ & \textbf{DQ} $\uparrow$ & \textbf{SQ} & \textbf{PQ}\\
+\textbf{Input} & \textbf{DICE2} $\uparrow$ & \textbf{AJI} $\uparrow$ & \textbf{DQ} $\uparrow$ & \textbf{SQ} $\uparrow$ & \textbf{PQ} $\uparrow$\\
 \midrule
-RGB         & \textbf{0.601} & \textbf{0.527} & \textbf{0.640} & \textbf{0.701} & \textbf{0.477}\\
-Hematoxylin & 0.593 & 0.514 & 0.635 & 0.689 & 0.468\\
-Blue        & 0.556 & 0.450 & 0.585 & 0.670 & 0.387\\
-Grayscale   & 0.586 & 0.501 & 0.625 & 0.692 & 0.444\\
+RGB         & 0.744 & 0.647 & 0.748 & 0.800 & 0.613\\
+Hematoxylin & \textbf{0.761} & \textbf{0.674} & \textbf{0.767} & \textbf{0.813} & \textbf{0.637}\\
+Blue        & 0.704 & 0.569 & 0.664 & 0.766 & 0.531\\
+Grayscale   & 0.753 & 0.646 & 0.744 & 0.807 & 0.614\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -847,10 +846,10 @@ Besides instance metrics, we also report a pixel-wise IoU and F1 score on the bi
 \toprule
 \textbf{Input} & \textbf{IoU} $\uparrow$ & \textbf{F1} $\uparrow$ \\
 \midrule
-RGB         & \textbf{0.656} & \textbf{0.870} \\
-Hematoxylin & 0.641 & 0.863 \\
-Blue        & 0.582 & 0.834 \\
-Grayscale   & 0.635 & 0.861 \\
+RGB         & 0.739 & 0.908 \\
+Hematoxylin & \textbf{0.755} & \textbf{0.915}\\
+Blue        & 0.673 & 0.881 \\
+Grayscale   & 0.732 & 0.906 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -947,12 +946,15 @@ Both scatter plots and quantitative metrics confirm that RGB and Hematoxylin rep
 Blue channel inputs lead to systematic underestimation in high-density regions, reflected by the lower $R^2$. 
 Grayscale remains competitive but with higher error variance.
 
-\section{Category-wise analysis} We also assessed the impact of nuclear morphology on performance by dividing the test set in four groups according to nuclear size (small or large) and density (high or low). The distribution of counting errors within these categories across the preprocessing modalities is depicted in Figure~\ref{fig:boxplot_categories}. Negative error values imply underestimation, and positive error values imply overestimation.
+\section{Category-wise analysis}
+To evaluate whether performance depends on nuclear morphology, we categorized the test set into four groups based on nuclear size (small vs.~large) and density (high vs.~low). 
+Figure~\ref{fig:boxplot_categories} shows the distribution of counting errors across these categories for each preprocessing modality. 
+Negative errors indicate underestimation, while positive values correspond to overestimation.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{imgs/boxplot.png}
-    \caption{Counting errors by category. Categories are defined by nuclear size (small/large) and density (high/low). Each boxplot corresponds to one preprocessing modality (RGB, Hematoxylin, Blue, Gray).}
+    \caption{Distribution of counting errors by category. Categories are defined by nuclear size (small/large) and density (high/low). Each boxplot corresponds to one preprocessing modality (RGB, H\&E, Blue, Gray).}
     \label{fig:boxplot_categories}
 \end{figure}
 
@@ -979,7 +981,7 @@ Here, MAE is the absolute counting error; AJI and DICE2 are instance-level overl
 We present the results on images excluded from training, used solely for qualitative evaluation.
 
 \subsection{Case selection and ranking}
-We define three difficulty levels using the \textbf{RGB} model as reference (selection is then fixed and reused across modalities):
+We define three difficulty levels using the \textbf{Hematoxylin} model as reference (selection is then fixed and reused across modalities):
 \begin{itemize}
   \item \textbf{Best}: highest PQ (tie-break by AJI), with MAE close to $0$.
   \item \textbf{Typical}: PQ close to the median of the test-set distribution and moderate MAE.
@@ -1002,7 +1004,7 @@ This ranking isolates visual patterns behind high/low performance and ensures co
 % }
 
 \subsection{Best case}
-Tabel~\ref{tab:best_metrics} presents the cover percentage and the count error for the sample image shown in figure~\ref{fig:qual_best} that is a representative \emph{best} sample. All modalities delineate nuclei well; \emph{RGB} and \emph{Hematoxylin} exhibit the cleanest borders and the smallest counting error.
+Tabel~\ref{tab:best_metrics} presents the cover percentage and the count error for the sample image shown in figure~\ref{fig:qual_best} that is a representative \emph{best} sample. All modalities delineate nuclei well; \emph{RGB} and \emph{Hematoxylin} exhibit the cleanest borders and perfect counting error with \emph{Blue}.
 
 \begin{figure}[!htbp]
 \centering
@@ -1026,7 +1028,7 @@ Tabel~\ref{tab:best_metrics} presents the cover percentage and the count error f
 \begin{subfigure}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{imgs/qualitative/best/HE/contour_img.png}
-  \caption{H deconvoluted}
+  \caption{Hematoxylin}
 \end{subfigure}
 
 \begin{subfigure}{0.48\textwidth}
@@ -1043,7 +1045,7 @@ Tabel~\ref{tab:best_metrics} presents the cover percentage and the count error f
 \caption{Qualitative visualization of nuclei segmentation for the best case. 
 Contours of predicted nuclei are shown in green. 
 (b) Ground-truth segmentation. 
-(c--f) Predictions from models trained on different input modalities: (c) RGB, (d) Hematoxylin deconvoluted, (e) Blue, and (f) Grayscale.}
+(c--f) Predictions from models trained on different input modalities: (c) RGB, (d) Hematoxylin, (e) Blue, and (f) Grayscale.}
 \label{fig:qual_best}
 \end{figure}
 \begin{table}[ht]
@@ -1052,12 +1054,12 @@ Contours of predicted nuclei are shown in green.
 \label{tab:best_metrics}
 \begin{tabular}{lcccccc}
 \toprule
-Modality & MAE & AJI & DICE2 & DQ & SQ & PQ \\
+Modality & MAE $\downarrow$ & AJI $\uparrow$ & DICE2 $\uparrow$ & DQ $\uparrow$ & SQ $\uparrow$ & PQ $\uparrow$ \\
 \midrule
-RGB  & \textbf{0} & \textbf{0.726} & 0.841 & \textbf{0.999} & 0.726 & \textbf{0.726} \\
-H\&E & 1 & 0.724 & \textbf{0.855} & 0.947 & \textbf{0.747} & 0.708 \\
-Blue & 4 & 0.617 & 0.796 & 0.636 & 0.697 & 0.443 \\
-Gray & 1 & 0.712 & 0.850 & 0.947 & 0.725 & 0.686 \\
+RGB  & 0 & 0.930 & \textbf{0.869} & 0.999 & \textbf{0.922} & \textbf{0.922} \\
+H\&E & \textbf{0} & \textbf{0.930} & 0.828 & \textbf{0.999} & 0.915 & 0.915 \\
+Blue & 0 & 0.882 & 0.758 & 0.965 & 0.882 & 0.851 \\
+Gray & 1 & 0.925 & 0.864 & 0.965 & 0.914 & 0.883 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1087,7 +1089,7 @@ In the \emph{typical} case (Fig.~\ref{fig:qual_typical}), borders remain well de
 \begin{subfigure}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{imgs/qualitative/medium/HE/contour_img.png}
-  \caption{H deconvoluted}
+  \caption{Hematoxylin}
 \end{subfigure}
 
 \begin{subfigure}{0.48\textwidth}
@@ -1104,7 +1106,7 @@ In the \emph{typical} case (Fig.~\ref{fig:qual_typical}), borders remain well de
 \caption{Qualitative visualization of nuclei segmentation for the typical case. 
 Contours of predicted nuclei are shown in green. 
 (b) Ground-truth segmentation. 
-(c--f) Predictions from models trained on different input modalities: (c) RGB, (d) Hematoxylin deconvoluted, (e) Blue, and (f) Grayscale.}
+(c--f) Predictions from models trained on different input modalities: (c) RGB, (d) Hematoxylin, (e) Blue, and (f) Grayscale.}
 \label{fig:qual_typical}
 \end{figure}
 \begin{table}[ht]
@@ -1113,17 +1115,17 @@ Contours of predicted nuclei are shown in green.
 \label{tab:typical_metrics}
 \begin{tabular}{lcccccc}
 \toprule
-Modality & MAE & AJI & DICE2 & DQ & SQ & PQ \\
+Modality & MAE $\downarrow$ & AJI $\uparrow$ & DICE2 $\uparrow$ & DQ $\uparrow$ & SQ $\uparrow$ & PQ$\uparrow$ \\
 \midrule
-RGB  & \textbf{5} & \textbf{0.567} & \textbf{0.667} & \textbf{0.639} & \textbf{0.730} & \textbf{0.467} \\
-H\&E & 4 & 0.560 & 0.645 & 0.621 & 0.719 & 0.447 \\
-Blue & 3 & 0.505 & 0.623 & 0.597 & 0.675 & 0.403 \\
-Gray & 5 & 0.576 & 0.674 & 0.639 & 0.709 & 0.454 \\
+RGB  & 8 & \textbf{0.697} & \textbf{0.673} & \textbf{0.839} & \textbf{0.848} & \textbf{0.712} \\
+H\&E & 11 & 0.631 & 0.662 & 0.766 & 0.835 & 0.641 \\
+Blue & 13 & 0.591 & 0.623 & 0.753 & 0.805 & 0.607 \\
+Gray & \textbf{7} & 0.658 & 0.680 & 0.798 & 0.836 & 0.668 \\
 \bottomrule
 \end{tabular}
 \end{table}
 \subsection{Hard case}
-The \emph{hard} case (Fig.~\ref{fig:qual_hard}) features overlapping/weakly stained nuclei. All modalities deteriorate, but \emph{RGB}/\emph{Hematoxylin} retain higher DQ (more detections) and AJI than \emph{Blue}, which shows under-segmentation (high MAE).
+The \emph{hard} case (Fig.~\ref{fig:qual_hard}) features overlapping/weakly stained nuclei. All modalities deteriorate, but \emph{Gray} retain higher DQ (more detections) and AJI than others, which shows under-segmentation (high MAE) but not \emph{Blue} that has the lowest MAE.
 
 \begin{figure}[!htbp]
 \centering
@@ -1146,7 +1148,7 @@ The \emph{hard} case (Fig.~\ref{fig:qual_hard}) features overlapping/weakly stai
 \begin{subfigure}{0.48\textwidth}
   \centering
   \includegraphics[width=\linewidth]{imgs/qualitative/worst/HE/contour_img.png}
-  \caption{H deconvoluted}
+  \caption{Hematoxylin}
 \end{subfigure}
 
 \begin{subfigure}{0.48\textwidth}
@@ -1163,7 +1165,7 @@ The \emph{hard} case (Fig.~\ref{fig:qual_hard}) features overlapping/weakly stai
 \caption{Qualitative visualization of nuclei segmentation for the worst/hard case. 
 Contours of predicted nuclei are shown in green. 
 (b) Ground-truth segmentation. 
-(c--f) Predictions from models trained on different input modalities: (c) RGB, (d) Hematoxylin deconvoluted, (e) Blue, and (f) Grayscale.}
+(c--f) Predictions from models trained on different input modalities: (c) RGB, (d) Hematoxylin, (e) Blue, and (f) Grayscale.}
 \label{fig:qual_hard}
 \end{figure}
 \begin{table}[ht]
@@ -1172,12 +1174,12 @@ Contours of predicted nuclei are shown in green.
 \label{tab:worst_metrics}
 \begin{tabular}{lcccccc}
 \toprule
-Modality & MAE & AJI & DICE2 & DQ & SQ & PQ \\
+Modality & MAE $\downarrow$ & AJI $\uparrow$ & DICE2 $\uparrow$ & DQ $\uparrow$ & SQ $\uparrow$ & PQ $\uparrow$ \\
 \midrule
-RGB  & 43 & \textbf{0.265} & \textbf{0.386} & \textbf{0.292} & 0.630 & 0.184 \\
-H\&E & 53 & 0.208 & 0.324 & 0.272 & 0.630 & 0.171 \\
-Blue & \textbf{37} & 0.235 & 0.356 & 0.257 & 0.635 & 0.163 \\
-Gray & 46 & 0.237 & 0.355 & 0.285 & \textbf{0.647} & \textbf{0.185} \\
+RGB  & 49 & 0.331 & \textbf{0.482} & 0.423 & 0.726 & 0.308 \\
+H\&E & 56 & 0.253 & 0.402 & 0.361 & \textbf{0.730} & 0.263 \\
+Blue & \textbf{33} & 0.317 & 0.482 & 0.431 & 0.705 & 0.304 \\
+Gray & 44 & \textbf{0.368} & 0.521 & \textbf{0.474} & 0.715 & \textbf{0.339} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1211,12 +1213,9 @@ An interesting future direction is to integrate transfer learning with the use o
 
 Overall, this work showed that multi-task learning processes with a neoplastic nuclei segmentation and counting had potential to be the baseline method to look into how different color modalities could affect results. We conclude by finding evidence that highlights the importance of including categorical and geometric information in robust nuclei analysis, and propose that future works involving transfer learning as well as more enriched geometric descriptors could get this field closer to reliable clinical applications.
 %% Fine dei capitoli normali, inizio dei capitoli-appendice (opzionali)
-%\appendix
+%%\appendix
 
 %\part{Appendici}
-
-%\chapter{Titolo della prima appendice}
-%Sed purus libero, vestibulum ut nibh vitae, mollis ultricies augue. Pellentesque velit libero, tempor sed pulvinar non, fermentum eu leo. Duis posuere eleifend nulla eget sagittis. Nam laoreet accumsan rutrum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Curabitur eget libero quis leo porttitor vehicula eget nec odio. Proin euismod interdum ligula non ultricies. Maecenas sit amet accumsan sapien.
 
 %% Parte conclusiva del documento; tipicamente per riassunto, bibliografia e/o indice analitico.
 \backmatter
